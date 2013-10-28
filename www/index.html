@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <!-- For Android, remove target-densitydpi -->
+    <!-- Android begin -->
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
+    <!-- Android end -->
+
+    <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+    <!-- iOS begin ->
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, target-densitydpi=device-dpi" />
+	<!- iOS end -->
+
+    <title>EvoThings Client</title>
+
+	<link rel="stylesheet" href="libs/jquery.mobile/css/themes/evothings/evothings.min.css">
+	<link rel="stylesheet" href="libs/jquery.mobile/css/themes/default/jquery.mobile.structure-1.3.2.min.css">
+
+	<script src="libs/jquery/jquery.js"></script>
+	<script src="libs/jquery.mobile/js/jquery.mobile-1.3.2.min.js"></script>
+	<script>
+	// TODO: Update for iOS 8 when released.
+	function AddPaddingForIOS7StatusBar()
+	{
+		if (navigator.userAgent.match(/CPU iPhone OS 7/) ||
+			navigator.userAgent.match(/CPU iPad OS 7/) ||
+			navigator.userAgent.match(/CPU iPod OS 7/) ||
+			navigator.userAgent.match(/iPhone; CPU OS 7/) ||
+			navigator.userAgent.match(/iPad; CPU OS 7/) ||
+			navigator.userAgent.match(/iPod; CPU OS 7/)
+			)
+		{
+			//document.write('<div style="width:20px;height:20px;"></div>')
+			$('.ui-header').css('margin-top', '20px')
+			//$('.ui-content').css('margin-top', '20px')
+		}
+	}
+	$(document).on('pageinit', function(event)
+	{
+		AddPaddingForIOS7StatusBar()
+	})
+	</script>
+	<style>
+	/*
+	.ui-header
+	{
+		margin-top: 50px;
+	}
+	.ui-header .ui-title
+	{
+		font-size: 20px;
+	}*/
+	</style>
+</head>
+<body>
+
+<div id="hyper-page-main" data-role="page" data-theme="a">
+	<div data-role="header">
+		<!-- <a href="#hyper-page-settings"
+			data-transition="none"
+			data-mini="true"
+			class="ui-btn-left">
+			Settings</a> -->
+		<h1>EvoThings</h1>
+		<a href="#hyper-page-info"
+			data-transition="none"
+			data-mini="true"
+			class="ui-btn-right">
+			Info</a>
+	</div>
+
+	<div data-role="content">
+		<input id="hyper-url" placeholder="Enter connect address" type="url" data-clear-btn="true">
+
+		<a id="hyper-button-connect" data-role="button"
+			data-inline="true" data-theme="c"
+			onclick="app.connect()">Connect</a>
+
+		<a id="hyper-button-connect" data-role="button"
+			data-inline="true" data-theme="b"
+			onclick="app.scan()">Scan</a>
+
+		<ul id="hyper-server-list" data-role="listview" data-inset="true">
+		</ul>
+	</div>
+</div>
+
+<div id="hyper-page-info" data-role="page">
+	<div data-role="header" data-position="fixed">
+		<a href="#hyper-page-main"
+			data-transition="none"
+			data-mini="true"
+			class="ui-btn-left">
+			Back</a>
+		<h1>Info</h1>
+	</div>
+
+	<div data-role="content">
+		<h3>EvoThings Client</h3>
+		<p>Use this app with the EvoThings Studio desktop application to develop mobile apps for IoT in HTML5/JavaScript. The desktop application is available at <a href="javascript:app.openBrowser('http://evothings.com')">evothings.com</a>.</p>
+
+		<h3>How to use</h3>
+		<p>Launch the EvoThings Studio desktop application. Locate the <b>connect address</b> displayed in the application's main window. Enter this address in the connect field on the main screen of this app. Press the <b>Connect</b> button. Click the <b>Run</b> button in the desktop user interface to launch an app on this device.</p>
+		<p>Note that you don't have to enter the port number part of the address (:4042) when the standard 4042 port is used. In this case you can just enter the IP-address (e.g. 192.168.0.103).</p>
+
+		<h3>Learn more</h3>
+		<p>For more information and tutorials, visit
+		<a href="javascript:app.openBrowser('http://evothings.com')">evothings.com</a></p>
+
+		<h3>Contact</h3>
+		<p>Email: <a href="mailto:alex@evothings.com">alex@evothings.com</a></p>
+		<p>App Version: 0.3.0</p><p>
+		<small>Copyright &copy; 2013 EvoThings AB</small></p>
+	</div>
+</div>
+
+<script src="cordova.js"></script>
+<script>
+var app = {}
+
+app.initialize = function()
+{
+    app.bindEvents()
+}
+
+// Bind Event Listeners
+//
+// Bind any events that are required on startup. Common events are:
+// 'load', 'deviceready', 'offline', and 'online'.
+app.bindEvents = function()
+{
+    document.addEventListener('deviceready', app.onDeviceReady, false)
+}
+
+app.onDeviceReady = function()
+{
+	// Not used.
+}
+
+// Set the url field to the saved value.
+app.setSavedIpAddress = function()
+{
+	document.getElementById("hyper-url").value =
+		localStorage.getItem('hyper-saved-url')
+		|| '192.168.0.x'
+
+}
+
+app.connect = function()
+{
+	// Get contents of url text field.
+    var ip = document.getElementById("hyper-url").value
+
+    // Save the field contents.
+    localStorage.setItem('hyper-saved-url', ip)
+
+    // Add protocol and port if needed.
+    var url = app.parseIpAddress(ip)
+
+    // Add url to list and connect.
+    if (url)
+    {
+    	app.connectTo(url)
+    }
+    else
+    {
+    	alert('Malformed URL: ' + url)
+    }
+}
+
+app.scan = function()
+{
+	// Scan for servers.
+	// TODO: Implement.
+}
+
+app.connectTo = function(url)
+{
+	setTimeout(function()
+		{
+			alert('Could not connect to the given address')
+			$('#hyper-button-connect .ui-btn-text').html('Connect')
+		},
+		5000)
+	$('#hyper-button-connect .ui-btn-text').html('Connecting...')
+    window.location.assign(url)
+}
+
+// Add protocol and port if needed.
+app.parseIpAddress = function(ip)
+{
+	var url = ip.trim()
+
+    if (!url.match('^https?://[A-Z0-9\.]*.*$'))
+    {
+    	// Add protocol.
+    	url = 'http://' + url
+    }
+
+    if (url.match('^https?://[0-9\.]*$') &&
+    	!url.match('^https?://[0-9\.]*:[0-9]*$') )
+    {
+    	// Add port to numeric ip address.
+    	url = url + ':4042'
+    }
+
+	return url
+}
+
+app.displayServers = function()
+{
+    var servers = app.gertServers()
+
+    var list = '<li data-role="list-divider">EvoThings Studio Servers</li>'
+
+	if (servers.length <= 0)
+	{
+		list +=
+			'<li>'
+			+	'<h2>No servers found</h2>'
+        	+ '</li>'
+	}
+	else
+	{
+		for (var i = 0; i < servers.length; ++i)
+		{
+			var server = servers[i]
+			list +=
+				'<li><a onclick="app.connectTo(\'' +
+				server.name + '\')">' + server.url + '</a></li>'
+		}
+    }
+
+    $('#hyper-server-list').html(list)
+    $('#hyper-server-list').listview('refresh')
+}
+
+app.openBrowser = function(url)
+{
+	window.open(url, '_blank', 'location=yes')
+}
+
+// Display the last used ip address.
+app.setSavedIpAddress()
+
+app.initialize()
+</script>
+
+</body>
+</html>

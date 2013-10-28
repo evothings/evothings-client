@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.evothings.evothingsclient" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>EvoThings Client</name>
+    <description>
+        Client app for EvoThings Studio.
+    </description>
+    <author email="alex@evothings.com" href="http://evothings.com">
+        EvoThings AB
+    </author>
+    <content src="index.html" />
+    <access origin="*" />
+    <preference name="fullscreen" value="false" />
+    <preference name="webviewbounce" value="false" />
+    <preference name="DisallowOverscroll" value="true" />
+    <preference name="orientation" value="default" />
+    <preference name="BackgroundColor" value="0xffffffff"/>
+	<preference name="HideKeyboardFormAccessoryBar" value="true" />
+	<preference name="FadeSplashScreen" value="false" />
+	<preference name="EnableViewportScale" value="true" />
+</widget>

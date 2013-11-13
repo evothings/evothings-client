@@ -74,13 +74,18 @@
 	<div data-role="content">
 		<input id="hyper-url" placeholder="Enter connect address" type="url" data-clear-btn="true">
 
-		<a id="hyper-button-connect" data-role="button"
-			data-inline="true" data-theme="c"
-			onclick="app.connect()">Connect</a>
-
-		<a id="hyper-button-connect" data-role="button"
-			data-inline="true" data-theme="b"
-			onclick="app.scan()">Scan</a>
+		<fieldset class="ui-grid-a">
+			<div class="ui-block-a">
+				<a id="hyper-button-connect" data-role="button"
+					data-inline="false" data-theme="c"
+					onclick="app.connect()">Connect</a>
+			</div>
+			<div class="ui-block-b">
+				<a id="hyper-button-scan" data-role="button"
+					data-inline="false" data-theme="b"
+					onclick="app.scan()">Scan</a>
+			</div>
+		</fieldset>
 
 		<ul id="hyper-server-list" data-role="listview" data-inset="true">
 		</ul>
@@ -119,6 +124,8 @@
 <script src="cordova.js"></script>
 <script>
 var app = {}
+app.serverList = []
+app.socketId = -1
 
 app.initialize = function()
 {
@@ -173,18 +180,137 @@ app.connect = function()
 app.scan = function()
 {
 	// Scan for servers.
-	// TODO: Implement.
+	app.setScanButtonStateToScanning()
+
+	// Empty server list.
+	app.serverList = []
+
+	// Unbind socket
+	if (app.socketId > -1)
+	{
+		chrome.socket.destroy(app.socketId)
+	}
+
+	// TODO: Move to hyper.js
+	var StringToBuffer = function(string)
+	{
+		var buffer = new ArrayBuffer(string.length)
+		var bufferView = new Uint8Array(buffer);
+		for (var i = 0; i < string.length; ++i)
+		{
+			bufferView[i] = string.charCodeAt(i)
+		}
+		return buffer
+	}
+
+	// TODO: Move to hyper.js
+	var BufferToString = function(buffer)
+	{
+		var string = ''
+		var view = new Uint8Array(buffer)
+		for (var i = 0; i < buffer.byteLength; ++i)
+		{
+			string += String.fromCharCode(view[i])
+		}
+		return string
+	}
+
+	chrome.socket.create('udp', {}, function(createInfo)
+	{
+		app.socketId = createInfo.socketId
+		bind()
+	})
+
+	function bind()
+	{
+		chrome.socket.bind(
+			app.socketId,
+			'',
+			4099,
+			function(result)
+			{
+				// TODO: Error handling?
+				// result 0 == success
+				if (result == 0)
+				{
+					send()
+				}
+				else
+				{
+					app.setScanButtonStateToNormal()
+					// TODO: When bind fails, try to destroy all sockets
+					// and scan again. However limit the number of attempts.
+				}
+			}
+		)
+	}
+
+	function send()
+	{
+		chrome.socket.sendTo(
+			app.socketId,
+			StringToBuffer('hyper.whoIsThere'),
+			'255.255.255.255',
+			4088,
+			function(writeInfo)
+			{
+				// TODO: Error handling?
+				// writeInfo.bytesWritten == 16 bytes
+				// ('hyper.whoIsThere') means success.
+				if (writeInfo.bytesWritten > 0)
+				{
+					recv()
+				}
+				else
+				{
+					app.setScanButtonStateToNormal()
+				}
+			}
+		)
+	}
+
+	function recv()
+	{
+		chrome.socket.recvFrom(
+			app.socketId,
+			function(recvInfo)
+			{
+				if (recvInfo.resultCode > 0)
+				{
+					// Add server info to list.
+					try
+					{
+						app.serverList.push(
+							JSON.parse(BufferToString(recvInfo.data)))
+						app.displayServers()
+						// TODO: Call recv again? To get data from other servers?
+						setTimeout(recv, 1)
+					}
+					catch (err)
+					{
+						// TODO: Error handling?
+					}
+				}
+				// TODO: Keep scanning state on button if multiple servers respond?
+				app.setScanButtonStateToNormal()
+			}
+		)
+	}
 }
 
 app.connectTo = function(url)
 {
+	chrome.socket.destroy(app.socketId)
+	app.socketId = -1
+
 	setTimeout(function()
 		{
 			alert('Could not connect to the given address')
-			$('#hyper-button-connect .ui-btn-text').html('Connect')
+			app.setConnectButtonStateToNormal()
 		},
 		5000)
-	$('#hyper-button-connect .ui-btn-text').html('Connecting...')
+
+	app.setConnectButtonStateToConnecting()
     window.location.assign(url)
 }
 
@@ -211,7 +337,7 @@ app.parseIpAddress = function(ip)
 
 app.displayServers = function()
 {
-    var servers = app.gertServers()
+    var servers = app.serverList
 
     var list = '<li data-role="list-divider">EvoThings Studio Servers</li>'
 
@@ -229,12 +355,32 @@ app.displayServers = function()
 			var server = servers[i]
 			list +=
 				'<li><a onclick="app.connectTo(\'' +
-				server.name + '\')">' + server.url + '</a></li>'
+				server.url + '\')">' + server.name + '</a></li>'
 		}
     }
 
     $('#hyper-server-list').html(list)
     $('#hyper-server-list').listview('refresh')
+}
+
+app.setConnectButtonStateToConnecting = function()
+{
+	$('#hyper-button-connect .ui-btn-text').html('Connecting...')
+}
+
+app.setConnectButtonStateToNormal = function()
+{
+	$('#hyper-button-connect .ui-btn-text').html('Connect')
+}
+
+app.setScanButtonStateToScanning = function()
+{
+	$('#hyper-button-scan .ui-btn-text').html('Scanning...')
+}
+
+app.setScanButtonStateToNormal = function()
+{
+	$('#hyper-button-scan .ui-btn-text').html('Scan')
 }
 
 app.openBrowser = function(url)

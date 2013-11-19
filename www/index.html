@@ -226,7 +226,7 @@ app.scan = function()
 		chrome.socket.bind(
 			app.socketId,
 			'',
-			4099,
+			0,
 			function(result)
 			{
 				// TODO: Error handling?
@@ -280,11 +280,13 @@ app.scan = function()
 					// Add server info to list.
 					try
 					{
+						// TODO: If server is already in list, ignore it.
 						app.serverList.push(
 							JSON.parse(BufferToString(recvInfo.data)))
 						app.displayServers()
 						// TODO: Call recv again? To get data from other servers?
-						setTimeout(recv, 1)
+						//setTimeout(recv, 1)
+						recv();
 					}
 					catch (err)
 					{

@@ -4,6 +4,10 @@ require './utils.rb'
 include FileUtils::Verbose
 
 mkdir_p 'platforms'
+mkdir_p 'plugins'
+
+# may have to edit AppData\Roaming\npm\node_modules\cordova\src\metadata\android_parser.js,
+# to set android-18.
 
 if(!File.exist?('platforms/android'))
 	sh 'cordova -d platform add android'
@@ -35,7 +39,8 @@ addPlugin('org.apache.cordova.vibration')
 addPlugin('org.chromium.socket')
 addPlugin('com.evothings.ble', '../cordova-ble')
 
-# need to change target android version from 17 to 18 now.
-# edit project.properties and AndroidManifest.xml.
-
 sh 'cordova build android'
+
+if(ARGV[0] == 'i')
+	sh 'adb install -r platforms\android\bin\EvoThingsClient-debug.apk'
+end

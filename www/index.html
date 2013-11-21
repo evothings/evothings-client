@@ -42,17 +42,6 @@
 		AddPaddingForIOS7StatusBar()
 	})
 	</script>
-	<style>
-	/*
-	.ui-header
-	{
-		margin-top: 50px;
-	}
-	.ui-header .ui-title
-	{
-		font-size: 20px;
-	}*/
-	</style>
 </head>
 <body>
 
@@ -72,23 +61,23 @@
 	</div>
 
 	<div data-role="content">
+		<div>
+			<a id="hyper-button-scan" data-role="button"
+				data-inline="false" data-theme="c"
+				onclick="app.scan()">Scan</a>
+		</div>
+
+		<ul id="hyper-server-list" data-role="listview"
+			data-inset="true" data-theme="a">
+		</ul>
+
 		<input id="hyper-url" placeholder="Enter connect address" type="url" data-clear-btn="true">
 
-		<fieldset class="ui-grid-a">
-			<div class="ui-block-a">
-				<a id="hyper-button-connect" data-role="button"
-					data-inline="false" data-theme="c"
-					onclick="app.connect()">Connect</a>
-			</div>
-			<div class="ui-block-b">
-				<a id="hyper-button-scan" data-role="button"
-					data-inline="false" data-theme="b"
-					onclick="app.scan()">Scan</a>
-			</div>
-		</fieldset>
-
-		<ul id="hyper-server-list" data-role="listview" data-inset="true">
-		</ul>
+		<div>
+			<a id="hyper-button-connect" data-role="button"
+				data-inline="false" data-theme="b"
+				onclick="app.connect()">Connect</a>
+		</div>
 	</div>
 </div>
 
@@ -179,20 +168,7 @@ app.connect = function()
 
 app.scan = function()
 {
-	// Scan for servers.
-	app.setScanButtonStateToScanning()
-
-	// Empty server list.
-	app.serverList = []
-
-	// Unbind socket
-	if (app.socketId > -1)
-	{
-		chrome.socket.destroy(app.socketId)
-	}
-
-	// TODO: Move to hyper.js
-	var StringToBuffer = function(string)
+	function stringToBuffer = function(string)
 	{
 		var buffer = new ArrayBuffer(string.length)
 		var bufferView = new Uint8Array(buffer);
@@ -203,8 +179,7 @@ app.scan = function()
 		return buffer
 	}
 
-	// TODO: Move to hyper.js
-	var BufferToString = function(buffer)
+	function bufferToString = function(buffer)
 	{
 		var string = ''
 		var view = new Uint8Array(buffer)
@@ -214,12 +189,6 @@ app.scan = function()
 		}
 		return string
 	}
-
-	chrome.socket.create('udp', {}, function(createInfo)
-	{
-		app.socketId = createInfo.socketId
-		bind()
-	})
 
 	function bind()
 	{
@@ -298,6 +267,25 @@ app.scan = function()
 			}
 		)
 	}
+
+	// Clear server list.
+	app.serverList = []
+
+	// Set button state.
+	app.setScanButtonStateToScanning()
+
+	// Unbind socket.
+	if (app.socketId > -1)
+	{
+		chrome.socket.destroy(app.socketId)
+	}
+
+	// Open UDP connection.
+	chrome.socket.create('udp', {}, function(createInfo)
+	{
+		app.socketId = createInfo.socketId
+		bind()
+	})
 }
 
 app.connectTo = function(url)

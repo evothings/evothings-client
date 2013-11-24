@@ -63,7 +63,7 @@
 	<div data-role="content">
 		<div>
 			<a id="hyper-button-scan" data-role="button"
-				data-inline="false" data-theme="c"
+				data-inline="false" data-theme="e"
 				onclick="app.scan()">Scan</a>
 		</div>
 
@@ -75,7 +75,7 @@
 
 		<div>
 			<a id="hyper-button-connect" data-role="button"
-				data-inline="false" data-theme="b"
+				data-inline="false" data-theme="c"
 				onclick="app.connect()">Connect</a>
 		</div>
 	</div>
@@ -168,7 +168,7 @@ app.connect = function()
 
 app.scan = function()
 {
-	function stringToBuffer = function(string)
+	function stringToBuffer(string)
 	{
 		var buffer = new ArrayBuffer(string.length)
 		var bufferView = new Uint8Array(buffer);
@@ -179,7 +179,7 @@ app.scan = function()
 		return buffer
 	}
 
-	function bufferToString = function(buffer)
+	function bufferToString(buffer)
 	{
 		var string = ''
 		var view = new Uint8Array(buffer)
@@ -218,7 +218,7 @@ app.scan = function()
 	{
 		chrome.socket.sendTo(
 			app.socketId,
-			StringToBuffer('hyper.whoIsThere'),
+			stringToBuffer('hyper.whoIsThere'),
 			'255.255.255.255',
 			4088,
 			function(writeInfo)
@@ -251,7 +251,7 @@ app.scan = function()
 					{
 						// TODO: If server is already in list, ignore it.
 						app.serverList.push(
-							JSON.parse(BufferToString(recvInfo.data)))
+							JSON.parse(bufferToString(recvInfo.data)))
 						app.displayServers()
 						// TODO: Call recv again? To get data from other servers?
 						//setTimeout(recv, 1)

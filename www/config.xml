@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.evothings.evothingsclient" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>EvoThings Client</name>
+<widget id="com.evothings.evothingsclient" version="0.6.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>EvoThings</name>
     <description>
-        Client app for EvoThings Studio.
+        Mobile app for EvoThings Studio.
     </description>
     <author email="alex@evothings.com" href="http://evothings.com">
         EvoThings AB

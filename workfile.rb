@@ -39,8 +39,26 @@ addPlugin('org.apache.cordova.vibration')
 addPlugin('org.chromium.socket')
 addPlugin('com.evothings.ble', '../cordova-ble')
 
+# copy icon files to platform(s)
+begin
+	androidIcons = {
+		'drawable-ldpi' => 36,
+		'drawable-mdpi' => 48,
+		'drawable-hdpi' => 72,
+		'drawable-xhdpi' => 96,
+		'drawable' => 96,
+	}
+	androidIcons.each do |tar,src|
+		tarFile = "platforms/android/res/#{tar}/icon.png"
+		srcFile = "config/icons/icon-#{src}.png"
+		if(!uptodate?(tarFile, [srcFile]))
+			cp(srcFile, tarFile)
+		end
+	end
+end
+
 sh 'cordova build android'
 
 if(ARGV[0] == 'i')
-	sh 'adb install -r platforms\android\bin\EvoThingsClient-debug.apk'
+	sh 'adb install -r platforms/android/bin/EvoThingsClient-debug.apk'
 end

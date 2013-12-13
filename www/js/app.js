@@ -149,6 +149,7 @@ app.scan = function()
 						var ip = recvInfo.address
 						var data = JSON.parse(bufferToString(recvInfo.data))
 						data.url = 'http://' + ip + ':' + data.port
+						data.ipAndPort = ip + ':' + data.port
 						app.serverList.push(data)
 						app.displayServers()
 						// Call recv again to get data from other servers if any.
@@ -237,7 +238,7 @@ app.displayServers = function()
 {
     var servers = app.serverList
 
-    var list = '<li data-role="list-divider">EvoThings Studio Servers</li>'
+    var list = '' //'<li data-role="list-divider" data-theme="a">EvoThings Studio Servers</li>'
 
 	if (servers.length <= 0)
 	{
@@ -253,7 +254,8 @@ app.displayServers = function()
 			var server = servers[i]
 			list +=
 				'<li><a onclick="app.connectTo(\'' +
-				server.url + '\')">' + server.name + '</a></li>'
+				server.url + '\')">' + server.name + '<br/>' +
+				'<small>' + server.ipAndPort + '</small></a></li>'
 		}
     }
 

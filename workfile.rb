@@ -6,8 +6,17 @@ include FileUtils::Verbose
 mkdir_p 'platforms'
 mkdir_p 'plugins'
 
-# may have to edit AppData\Roaming\npm\node_modules\cordova\src\metadata\android_parser.js,
-# to set android-18.
+# You may have to edit android_parser.js to update the Android platform
+# level to refer to at least android-18.
+# Windows:
+#   AppData\Roaming\npm\node_modules\cordova\src\metadata\android_parser.js
+# OS X:
+#   /usr/local/lib/node_modules/cordova/src/metadata/android_parser.js
+#
+# Alternatively, if you have an existing Cordova Android existing project
+# you wish to update, edit the following files:
+#   platforms/android/project.properties (update to: target=android-18)
+#   platforms/android/AndroidManifest.xml (update to: android:targetSdkVersion="18")
 
 if(!File.exist?('platforms/android'))
 	sh 'cordova -d platform add android'

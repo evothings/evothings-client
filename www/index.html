@@ -35,19 +35,23 @@
 		<div>
 			<a id="hyper-button-scan" data-role="button"
 				data-inline="false" data-theme="e"
-				onclick="app.scan()">Scan</a>
+				onclick="app.scan()">Scan to connect</a>
 		</div>
 
 		<ul id="hyper-server-list" data-role="listview"
 			data-inset="true" data-theme="a">
 		</ul>
 
-		<input id="hyper-url" placeholder="Enter connect address" type="url" data-clear-btn="true">
-
 		<div>
+		<p>Connect manually:</p>
+		<input id="hyper-url"
+			placeholder="Enter connect address"
+			type="url"
+			data-clear-btn="true">
+
 			<a id="hyper-button-connect" data-role="button"
-				data-inline="false" data-theme="c"
-				onclick="app.connect()">Connect</a>
+				data-inline="false" data-theme="a"
+				onclick="app.connect()">Connect to IP-address</a>
 		</div>
 	</div>
 </div>
@@ -63,12 +67,14 @@
 	</div>
 
 	<div data-role="content">
-		<h3>EvoThings Client</h3>
-		<p>Use this app with the EvoThings Studio desktop application to develop mobile apps for IoT in HTML5/JavaScript. The desktop application is available at <a href="javascript:app.openBrowser('http://evothings.com')">evothings.com</a>.</p>
+		<h3>EvoThings App</h3>
+		<p>Use this app with the EvoThings Workbench desktop application to develop mobile apps for IoT in HTML5/JavaScript. The desktop application is available at <a href="javascript:app.openBrowser('http://evothings.com')">evothings.com</a>.</p>
 
 		<h3>How to use</h3>
-		<p>Launch the EvoThings Studio desktop application. Locate the <b>connect address</b> displayed in the application's main window. Enter this address in the connect field on the main screen of this app. Press the <b>Connect</b> button. Click the <b>Run</b> button in the desktop user interface to launch an app on this device.</p>
-		<p>Note that you don't have to enter the port number part of the address (:4042) when the standard 4042 port is used. In this case you can just enter the IP-address (e.g. 192.168.0.103).</p>
+		<p>Launch the EvoThings Workbench desktop application. Press the <b>Scan</b> button in this app. The running Workbench application should appear as a selectable item. Tap the item to connect.</p>
+		<p>Click the <b>Run</b> button of a project in the Workbench to launch an app on this device.</p>
+		<p>Alternatively, you can connect using the <b>connect address</b> displayed in the main window of the Workbench. Enter this address in the connect field and press the <b>Connect</b> button.
+		Note that you don't have to enter the port number part of the address (:4042) when the standard 4042 port is used. In this case you can just enter the IP-address (e.g. 192.168.0.103).</p>
 
 		<h3>Learn more</h3>
 		<p>For more information and tutorials, visit

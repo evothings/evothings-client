@@ -254,8 +254,11 @@ app.displayServers = function()
 			var server = servers[i]
 			list +=
 				'<li><a onclick="app.connectTo(\'' +
-				server.url + '\')">' + server.name + '<br/>' +
-				'<small>' + server.ipAndPort + '</small></a></li>'
+				server.url + '\')">' +
+				'<strong>Touch here to connect to:</strong><br/>' +
+				server.name + '<br/>' +
+				'<small>' + server.ipAndPort + '</small><br/>' +
+				'</a></li>'
 		}
     }
 
@@ -280,7 +283,7 @@ app.setScanButtonStateToScanning = function()
 
 app.setScanButtonStateToNormal = function()
 {
-	$('#hyper-button-scan .ui-btn-text').html('Scan')
+	$('#hyper-button-scan .ui-btn-text').html('Scan again')
 }
 
 app.openBrowser = function(url)

@@ -34,20 +34,24 @@
 	<div data-role="content">
 		<div>
 			<a id="hyper-button-scan" data-role="button"
-				data-inline="false" data-theme="e"
-				onclick="app.scan()">Scan</a>
+				data-inline="false" data-theme="c"
+				onclick="app.scan()">Scan to connect</a>
 		</div>
 
 		<ul id="hyper-server-list" data-role="listview"
 			data-inset="true" data-theme="a">
 		</ul>
 
-		<input id="hyper-url" placeholder="Enter connect address" type="url" data-clear-btn="true">
-
 		<div>
+		<p>Connect manually:</p>
+		<input id="hyper-url"
+			placeholder="Enter connect address"
+			type="url"
+			data-clear-btn="true">
+
 			<a id="hyper-button-connect" data-role="button"
-				data-inline="false" data-theme="c"
-				onclick="app.connect()">Connect</a>
+				data-inline="false" data-theme="a"
+				onclick="app.connect()">Connect to IP-address</a>
 		</div>
 	</div>
 </div>

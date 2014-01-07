@@ -20,7 +20,12 @@ app.bindEvents = function()
 
 app.onDeviceReady = function()
 {
-	// Not used.
+	// Networking API won't work until device is ready.
+	// The Scan button is blank initially, and the text
+	// of the button is set here, when device is ready.
+	// TODO: Would be better to diable the button and
+	// enable it when device is ready.
+	app.setScanButtonStateToReadyToScan()
 }
 
 // Important to always close socket when page reloads/closes!
@@ -279,6 +284,11 @@ app.setConnectButtonStateToNormal = function()
 app.setScanButtonStateToScanning = function()
 {
 	$('#hyper-button-scan .ui-btn-text').html('Scanning...')
+}
+
+app.setScanButtonStateToReadyToScan = function()
+{
+	$('#hyper-button-scan .ui-btn-text').html('Scan to connect')
 }
 
 app.setScanButtonStateToNormal = function()

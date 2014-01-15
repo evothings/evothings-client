@@ -70,6 +70,12 @@ app.connect = function()
 
 app.scan = function()
 {
+	if (hyper.isWP)
+	{
+		// Scan is not available in Windows Phone.
+		return
+	}
+
 	function stringToBuffer(string)
 	{
 		var buffer = new ArrayBuffer(string.length)
@@ -288,7 +294,18 @@ app.setScanButtonStateToScanning = function()
 
 app.setScanButtonStateToReadyToScan = function()
 {
-	$('#hyper-button-scan .ui-btn-text').html('Scan to connect')
+	if (hyper.isWP)
+	{
+		$('#hyper-button-scan .ui-btn-text').html('Scan not available')
+		$('#hyper-button-scan').css('background', 'rgb(128,128,128)')
+		$('#hyper-button-scan').css('border-color', 'rgb(128,128,128)')
+		// This does not seem to work.
+		$('#hyper-button-scan').button('disable')
+	}
+	else
+	{
+		$('#hyper-button-scan .ui-btn-text').html('Scan to connect')
+	}
 }
 
 app.setScanButtonStateToNormal = function()

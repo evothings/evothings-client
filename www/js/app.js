@@ -297,6 +297,10 @@ app.setScanButtonStateToReadyToScan = function()
 	if (hyper.isWP)
 	{
 		$('#hyper-button-scan .ui-btn-text').html('Scan not available')
+		$('#hyper-button-scan').css('background', 'rgb(128,128,128)')
+		$('#hyper-button-scan').css('border-color', 'rgb(128,128,128)')
+		// This does not seem to work.
+		$('#hyper-button-scan').button('disable')
 	}
 	else
 	{

@@ -18,5 +18,16 @@
 			navigator.userAgent.match(/iPod/)
 	}
 
+	hyper.isAndroid = function()
+	{
+		return navigator.userAgent.match(/Android/) ||
+			navigator.userAgent.match(/android/)
+	}
+
+	hyper.isWP = function()
+	{
+		return navigator.userAgent.match(/Windows Phone/)
+	}
+
 	return hyper
 })(window.hyper || {});

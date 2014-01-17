@@ -70,7 +70,7 @@ app.connect = function()
 
 app.scan = function()
 {
-	if (hyper.isWP)
+	if (hyper.isWP())
 	{
 		// Scan is not available in Windows Phone.
 		return
@@ -294,7 +294,7 @@ app.setScanButtonStateToScanning = function()
 
 app.setScanButtonStateToReadyToScan = function()
 {
-	if (hyper.isWP)
+	if (hyper.isWP())
 	{
 		$('#hyper-button-scan .ui-btn-text').html('Scan not available')
 		$('#hyper-button-scan').css('background', 'rgb(128,128,128)')

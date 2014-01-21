@@ -1,0 +1,2 @@
+@interface URLProtocolCordovaJs : NSURLProtocol
+@end

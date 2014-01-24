@@ -1,10 +1,48 @@
 # Build script for EvoThings client app.
 #
-# Possible switches are "c" (clean) and "i" (install).
+# Possible switches are:
+# c - clean before building
+# i - install after building
+# android - build Android
+# wp8 - build Windows Phone 8
+# ios - build iOS
+#
+# By default, Android will be built.
+# Only one platform may be built per invocation.
+#
 # Examples:
 #   ruby workfile.rb
 #   ruby workfile.rb i
 #   ruby workfile.rb c i
+
+# load localConfig.rb, if it exists.
+lc = "#{File.dirname(__FILE__)}/localConfig.rb"
+require lc if(File.exists?(lc))
+
+if(!defined?(CONFIG_DEFAULT_PLATFORM))
+	CONFIG_DEFAULT_PLATFORM = 'android'
+end
+
+# parse ARGV
+begin
+	c = false
+	i = false
+	platform = CONFIG_DEFAULT_PLATFORM
+	ARGV.each do |arg|
+		case (arg)
+			when 'c'
+				c = true
+			when 'i'
+				i = true
+			when 'android', 'wp8', 'ios'
+				platform = arg
+			else raise "Invalid argument #{arg}"
+		end
+	end
+	CLEAN = c
+	INSTALL = i
+	PLATFORM = platform
+end
 
 require 'fileutils'
 require './utils.rb'
@@ -43,9 +81,12 @@ def addPlugins
 	addPlugin('org.apache.cordova.vibration')
 	addPlugin('org.chromium.socket')
 	addPlugin('com.evothings.ble', '../cordova-ble')
+	if(PLATFORM == 'wp8')
+		addPlugin('com.evothings.ble', '../phonegap-sms-plugin')
+	end
 end
 
-def buildAndroid
+def build
 	# Cordova Android version hack:
 	#
 	# Update: On Cordova 3.3 this does not seem to be an issue, as android-19 is used.
@@ -63,16 +104,16 @@ def buildAndroid
 	#   platforms/android/AndroidManifest.xml (update to: android:targetSdkVersion="18")
 
 	# Remove platform(s) if switch "c" (clean) is given.
-	if(ARGV[0] == 'c' || ARGV[1] == 'c')
-		sh 'cordova -d platform remove android'
+	if(CLEAN)
+		sh "cordova -d platform remove #{PLATFORM}"
 	end
 
-	if(!File.exist?('platforms/android'))
-		sh 'cordova -d platform add android'
+	if(!File.exist?("platforms/#{PLATFORM}"))
+		sh "cordova -d platform add #{PLATFORM}"
 	end
 
 	# Copy icon files to platform.
-	begin
+	if(PLATFORM == 'android')
 		androidIcons = {
 			'drawable-ldpi' => 36,
 			'drawable-mdpi' => 48,
@@ -93,49 +134,26 @@ def buildAndroid
 	end
 
 	# Copy native source files to platform.
-	begin
+	if(PLATFORM == 'android')
 		srcFile = "config/native/android/src/com/evothings/evothingsclient/EvoThings.java"
 		destFile = "platforms/android/src/com/evothings/evothingsclient/EvoThings.java"
 		cp(srcFile, destFile)
 	end
 
-	# Build platform.
-	sh 'cordova build android'
-
-	# Install debug build if switch "i" is given.
-	if(ARGV[0] == 'i' || ARGV[1] == 'i')
-		sh 'adb install -r platforms/android/bin/EvoThings-debug.apk'
-	end
-end
-
-def buildIOS
-	# Remove platform(s) if switch "c" (clean) is given.
-	if(ARGV[0] == 'c' || ARGV[1] == 'c')
-		sh 'cordova -d platform remove ios'
-	end
-
-	if(!File.exist?('platforms/ios'))
-		sh 'cordova -d platform add ios'
-	end
-
-	# Copy icon files to platform(s)
-	# TODO: Implement
-
 	# Copy native source files to platform.
-	begin
+	if(PLATFORM == 'ios')
 		cp("config/native/ios/main.m", "platforms/ios/EvoThings/main.m")
 		cp("config/native/ios/URLProtocolCordovaJs.h", "platforms/ios/EvoThings/URLProtocolCordovaJs.h")
 		cp("config/native/ios/URLProtocolCordovaJs.m", "platforms/ios/EvoThings/URLProtocolCordovaJs.m")
 	end
 
 	# Build platform.
-	sh 'cordova build ios'
+	sh "cordova build #{PLATFORM}"
+
+	# Install debug build if switch "i" is given.
+	if(INSTALL && PLATFORM == 'android')
+		sh 'adb install -r platforms/android/bin/EvoThings-debug.apk'
+	end
 end
 
-addPlugins
-
-buildAndroid
-
-if RUBY_PLATFORM =~ /(darwin)/i then
-	buildIOS
-end
+build

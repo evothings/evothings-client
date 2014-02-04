@@ -102,7 +102,7 @@ app.scan = function()
 	{
 		chrome.socket.bind(
 			app.socketId,
-			'',
+			null,
 			0,
 			function(result)
 			{
@@ -217,7 +217,7 @@ app.connectTo = function(url)
 			alert('Could not connect to the given address')
 			app.setConnectButtonStateToNormal()
 		},
-		5000)
+		30000)
 
 	// Set button to 'Connecting' state and open the url.
 	app.setConnectButtonStateToConnecting()

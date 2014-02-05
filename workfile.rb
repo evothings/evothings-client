@@ -147,6 +147,9 @@ def build
 		cp("config/native/ios/URLProtocolCordovaJs.m", "platforms/ios/EvoThings/URLProtocolCordovaJs.m")
 	end
 
+	# Add all plugins
+	addPlugins
+
 	# Build platform.
 	sh "cordova build #{PLATFORM}"
 

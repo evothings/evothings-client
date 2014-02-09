@@ -143,8 +143,6 @@ def build
 	# Copy native source files to platform.
 	if(PLATFORM == 'ios')
 		cp("config/native/ios/main.m", "platforms/ios/EvoThings/main.m")
-		cp("config/native/ios/URLProtocolCordovaJs.h", "platforms/ios/EvoThings/URLProtocolCordovaJs.h")
-		cp("config/native/ios/URLProtocolCordovaJs.m", "platforms/ios/EvoThings/URLProtocolCordovaJs.m")
 	end
 
 	# Add all plugins

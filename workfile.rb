@@ -133,6 +133,34 @@ def build
 		end
 	end
 
+	# Copy icons files for iOS. For info see:
+	# https://developer.apple.com/library/ios/documentation/iPhone/Conceptual/iPhoneOSProgrammingGuide/App-RelatedResources/App-RelatedResources.html#//apple_ref/doc/uid/TP40007072-CH6-SW1
+	if(PLATFORM == 'ios')
+		srcPath = 'config/icons/'
+		destPath = 'platforms/ios/EvoThings/Resources/icons/'
+
+		# Delete old icons.
+		FileUtils.rm_rf(Dir.glob(destPath + '*'))
+
+		copyIOSIcon = lambda do |src, dest|
+			cp(srcPath + src, destPath + dest)
+		end
+
+		copyIOSIcon.call('icon-40.png', 'icon-40.png')
+		copyIOSIcon.call('icon-80.png', 'icon-40@2x.png')
+		copyIOSIcon.call('icon-60.png', 'icon-60.png')
+		copyIOSIcon.call('icon-120.png', 'icon-60@2x.png')
+		copyIOSIcon.call('icon-76.png', 'icon-76.png')
+		copyIOSIcon.call('icon-152.png', 'icon-76@2x.png')
+	end
+
+	# Copy iOS splash screens.
+	if(PLATFORM == 'ios')
+		srcPath = 'config/icons/ios_splash'
+		destPath = 'platforms/ios/EvoThings/Resources/splash'
+		FileUtils.copy_entry(srcPath, destPath)
+	end
+
 	# Copy native source files to platform.
 	if(PLATFORM == 'android')
 		srcFile = "config/native/android/src/com/evothings/evothingsclient/EvoThings.java"
@@ -143,9 +171,10 @@ def build
 	# Copy native source files to platform.
 	if(PLATFORM == 'ios')
 		cp("config/native/ios/main.m", "platforms/ios/EvoThings/main.m")
-		cp("config/native/ios/URLProtocolCordovaJs.h", "platforms/ios/EvoThings/URLProtocolCordovaJs.h")
-		cp("config/native/ios/URLProtocolCordovaJs.m", "platforms/ios/EvoThings/URLProtocolCordovaJs.m")
 	end
+
+	# Add all plugins
+	addPlugins
 
 	# Build platform.
 	sh "cordova build #{PLATFORM}"

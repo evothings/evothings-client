@@ -146,11 +146,19 @@ def build
 			cp(srcPath + src, destPath + dest)
 		end
 
+		copyIOSIcon.call('icon-29.png', 'icon-small.png')
 		copyIOSIcon.call('icon-40.png', 'icon-40.png')
+		copyIOSIcon.call('icon-50.png', 'icon-50.png')
+		copyIOSIcon.call('icon-57.png', 'icon.png')
+		copyIOSIcon.call('icon-58.png', 'icon-small@2x.png')
 		copyIOSIcon.call('icon-80.png', 'icon-40@2x.png')
 		copyIOSIcon.call('icon-60.png', 'icon-60.png')
+		copyIOSIcon.call('icon-100.png', 'icon-50@2x.png')
+		copyIOSIcon.call('icon-114.png', 'icon@2x.png')
 		copyIOSIcon.call('icon-120.png', 'icon-60@2x.png')
+		copyIOSIcon.call('icon-72.png', 'icon-72.png')
 		copyIOSIcon.call('icon-76.png', 'icon-76.png')
+		copyIOSIcon.call('icon-144.png', 'icon-72@2x.png')
 		copyIOSIcon.call('icon-152.png', 'icon-76@2x.png')
 	end
 

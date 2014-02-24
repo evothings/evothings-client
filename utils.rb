@@ -8,5 +8,5 @@ def sh(cmd)
 	end
 	# run it.
 	success = system(cmd)
-	error "Command failed" unless(success)
+	raise "Command failed" unless(success)
 end

@@ -52,8 +52,68 @@ include FileUtils::Verbose
 mkdir_p 'platforms'
 mkdir_p 'plugins'
 
+# create temporary www/index.html for the benefit of "cordova platform add".
+if(!File.exist?('www/index.html'))
+	cp('config/index.html', 'www/index.html')
+end
+
+@versionString = ''
+
+def fileRead(filePath)
+  File.open(filePath, "r") { |f| f.read.force_encoding("UTF-8") }
+end
+
+def fileSave(destFile, content)
+  File.open(destFile, "w") { |f| f.write(content) }
+end
+
+# read version.xml
+begin
+	config = fileRead('./www/config.xml')
+
+	# Get version number from config.xml.
+	versionMatch = config.scan(/version="(.*?)"/)
+	if(versionMatch.empty?)
+		error "Version not found in config.xml!"
+	end
+	@versionString += "#{versionMatch[0][0]}<br>\n"
+	puts "Version found: #{@versionString}"
+end
+
+def addGitHash(name, location)
+	oldDir = pwd
+	cd location
+	rp = "git rev-parse HEAD"
+	sh rp	# make sure the command doesn't fail; open() doesn't do that.
+	hash = open("|#{rp}").read.strip
+	ss = "git status -s"
+	sh ss
+	mod = open("|#{ss}").read.strip
+	if(mod != "")
+		mod = " modified"
+	end
+	#p name, hash,versionString
+	@versionString += "#{name}: #{hash[0,8]}#{mod}<br>\n"
+	cd oldDir
+end
+
+addGitHash('EvoThingsClient', '.')
+
+def processVersionFile(src, dst)
+	index = fileRead(src)
+	if(!index.gsub!('<version>', @versionString))
+		error "Could not find <version> in #{src}"
+	end
+	fileSave(dst, index);
+end
+
 def addPlugins
-	def addPlugin(name, location = name)
+	def addPlugin(name, location=nil)
+		if(location)
+			addGitHash(name, location)
+		else
+			location = name
+		end
 		if(!File.exist?("plugins/#{name}"))
 			sh "cordova -d plugin add #{location}"
 		end
@@ -82,7 +142,7 @@ def addPlugins
 	addPlugin('org.chromium.socket')
 	addPlugin('com.evothings.ble', '../cordova-ble')
 	if(PLATFORM == 'wp8')
-		addPlugin('com.evothings.ble', '../phonegap-sms-plugin')
+		addPlugin('org.apache.cordova.plugin.sms', '../phonegap-sms-plugin')
 	end
 end
 
@@ -183,6 +243,9 @@ def build
 
 	# Add all plugins
 	addPlugins
+
+	# Process index.html and copy to platform.
+	processVersionFile('config/index.html', 'www/index.html')
 
 	# Build platform.
 	sh "cordova build #{PLATFORM}"

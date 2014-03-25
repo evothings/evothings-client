@@ -106,7 +106,7 @@ def readVersionNumber
 
 	# Get version number from config.xml.
 	versionMatch = config.scan(/version="(.*?)"/)
-	if (versionMatch.empty?)
+	if(versionMatch.empty?)
 		error "Version not found in config.xml!"
 	end
 
@@ -138,7 +138,7 @@ def createIndexFileWithVersionInfo
 	version = readVersionNumber()
 	gitInfo = readGitInfo("EvoThingsClient", ".")
 	versionString = "#{version}<br/>\n#{gitInfo}<br/>\n"
-	if (!index.gsub!("<version>", versionString))
+	if(!index.gsub!("<version>", versionString))
 		error "Could not find <version> in #{src}"
 	end
 	fileSave("www/index.html", index)

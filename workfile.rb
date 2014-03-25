@@ -206,20 +206,20 @@ def build
 			cp(srcPath + src, destPath + dest)
 		end
 
-		copyIOSIcon.call('icon-29.png', 'icon-small.png')
-		copyIOSIcon.call('icon-40.png', 'icon-40.png')
-		copyIOSIcon.call('icon-50.png', 'icon-50.png')
-		copyIOSIcon.call('icon-57.png', 'icon.png')
-		copyIOSIcon.call('icon-58.png', 'icon-small@2x.png')
-		copyIOSIcon.call('icon-80.png', 'icon-40@2x.png')
-		copyIOSIcon.call('icon-60.png', 'icon-60.png')
-		copyIOSIcon.call('icon-100.png', 'icon-50@2x.png')
-		copyIOSIcon.call('icon-114.png', 'icon@2x.png')
-		copyIOSIcon.call('icon-120.png', 'icon-60@2x.png')
-		copyIOSIcon.call('icon-72.png', 'icon-72.png')
-		copyIOSIcon.call('icon-76.png', 'icon-76.png')
-		copyIOSIcon.call('icon-144.png', 'icon-72@2x.png')
-		copyIOSIcon.call('icon-152.png', 'icon-76@2x.png')
+		copyIOSIcon.call('icon-white-29.png', 'icon-small.png')
+		copyIOSIcon.call('icon-white-40.png', 'icon-40.png')
+		copyIOSIcon.call('icon-white-50.png', 'icon-50.png')
+		copyIOSIcon.call('icon-white-57.png', 'icon.png')
+		copyIOSIcon.call('icon-white-58.png', 'icon-small@2x.png')
+		copyIOSIcon.call('icon-white-80.png', 'icon-40@2x.png')
+		copyIOSIcon.call('icon-white-60.png', 'icon-60.png')
+		copyIOSIcon.call('icon-white-100.png', 'icon-50@2x.png')
+		copyIOSIcon.call('icon-white-114.png', 'icon@2x.png')
+		copyIOSIcon.call('icon-white-120.png', 'icon-60@2x.png')
+		copyIOSIcon.call('icon-white-72.png', 'icon-72.png')
+		copyIOSIcon.call('icon-white-76.png', 'icon-76.png')
+		copyIOSIcon.call('icon-white-144.png', 'icon-72@2x.png')
+		copyIOSIcon.call('icon-white-152.png', 'icon-76@2x.png')
 	end
 
 	# Copy iOS splash screens.
@@ -239,13 +239,14 @@ def build
 	# Copy native source files to platform.
 	if(PLATFORM == 'ios')
 		cp("config/native/ios/main.m", "platforms/ios/EvoThings/main.m")
+		cp("config/native/ios/EvoThings-Info.plist", "platforms/ios/EvoThings/EvoThings-Info.plist")
 	end
 
 	# Add all plugins
 	addPlugins
 
 	# Process index.html and copy to platform.
-	processVersionFile('config/index.html', 'www/index.html')
+	processVersionFile('config/www/index.html', 'www/index.html')
 
 	# Build platform.
 	sh "cordova build #{PLATFORM}"

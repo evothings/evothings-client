@@ -31,7 +31,7 @@ import java.io.IOException;
 import org.apache.cordova.CordovaResourceApi.OpenForReadResult;
 import org.apache.cordova.*;
 
-public class EvoThings extends CordovaActivity
+public class Evothings extends CordovaActivity
 {
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -121,7 +121,7 @@ public class EvoThings extends CordovaActivity
 			}
 			catch (IOException e)
 			{
-				Log.e("EvoThings", "File not found: " + assetURL);
+				Log.e("Evothings", "File not found: " + assetURL);
 				// This results in a 404.
 				return new WebResourceResponse("text/plain", "UTF-8", null);
 			}

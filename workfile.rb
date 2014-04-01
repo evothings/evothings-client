@@ -1,4 +1,4 @@
-# Build script for EvoThings client app.
+# Build script for Evothings client app.
 #
 # Possible switches are:
 # c - clean before building
@@ -80,7 +80,7 @@ def addPlugins
 	addPlugin("org.apache.cordova.media-capture")
 	addPlugin("org.apache.cordova.network-information")
 	# Splashscreen requires adding splashscreen media files to
-	# the build, and is not meaningful for EvoThings client.
+	# the build, and is not meaningful for Evothings client.
 	#addPlugin("org.apache.cordova.splashscreen")
 	addPlugin("org.apache.cordova.vibration")
 	addPlugin("org.chromium.socket")
@@ -205,9 +205,10 @@ def copyIconsAndPlatformFiles
 
 	# Copy native Android source files.
 	if(@platform == "android")
-		srcFile = "config/native/android/src/com/evothings/evothingsclient/EvoThings.java"
-		destFile = "platforms/android/src/com/evothings/evothingsclient/EvoThings.java"
-		cp(srcFile, destFile)
+		cp("config/native/android/src/com/evothings/evothingsclient/Evothings.java",
+			"platforms/android/src/com/evothings/evothingsclient/Evothings.java")
+		cp("config/native/android/AndroidManifest.xml",
+			"platforms/android/AndroidManifest.xml")
 	end
 
 	# Copy native iOS source files.
@@ -248,7 +249,7 @@ def build
 
 	# Install debug build if switch "i" is given.
 	if(@install && @platform == "android")
-		sh "adb install -r platforms/android/bin/EvoThings-debug.apk"
+		sh "adb install -r platforms/android/bin/Evothings-debug.apk"
 	end
 end
 

@@ -205,9 +205,10 @@ def copyIconsAndPlatformFiles
 
 	# Copy native Android source files.
 	if(@platform == "android")
-		srcFile = "config/native/android/src/com/evothings/evothingsclient/Evothings.java"
-		destFile = "platforms/android/src/com/evothings/evothingsclient/Evothings.java"
-		cp(srcFile, destFile)
+		cp("config/native/android/src/com/evothings/evothingsclient/Evothings.java",
+			"platforms/android/src/com/evothings/evothingsclient/Evothings.java")
+		cp("config/native/android/AndroidManifest.xml",
+			"platforms/android/AndroidManifest.xml")
 	end
 
 	# Copy native iOS source files.

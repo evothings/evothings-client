@@ -215,6 +215,10 @@ def copyIconsAndPlatformFiles
 	if(@platform == "ios")
 		cp("config/native/ios/main.m", "platforms/ios/EvoThings/main.m")
 		cp("config/native/ios/EvoThings-Info.plist", "platforms/ios/EvoThings/EvoThings-Info.plist")
+		# Patch for Cordova 3.4 and iOS 7.1 (remote when upgrading to Cordova 3.5)
+		# http://shazronatadobe.wordpress.com/2014/03/12/xcode-5-1-and-cordova-ios/
+		cp("config/native/ios/CDVCommandQueue.m", "platforms/ios/CordovaLib/Classes/CDVCommandQueue.m")
+		cp("config/native/ios/CDVViewController.m", "platforms/ios/CordovaLib/Classes/CDVViewController.m")
 	end
 end
 

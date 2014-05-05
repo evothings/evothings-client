@@ -85,6 +85,7 @@ def addPlugins
 	addPlugin("org.apache.cordova.vibration")
 	addPlugin("org.chromium.socket")
 	addPlugin("com.evothings.ble", "../cordova-ble")
+	addPlugin("org.apache.cordova.ibeacon", "../cordova-plugin-ibeacon")
 	# Should we ship the SMS plugin?
 	# Commenting out the plugin for now.
 	#if(@platform == "wp8")
@@ -215,10 +216,13 @@ def copyIconsAndPlatformFiles
 	if(@platform == "ios")
 		cp("config/native/ios/main.m", "platforms/ios/EvoThings/main.m")
 		cp("config/native/ios/EvoThings-Info.plist", "platforms/ios/EvoThings/EvoThings-Info.plist")
-		# Patch for Cordova 3.4 and iOS 7.1 (remote when upgrading to Cordova 3.5)
+
+		# According to the page below, this patch in shipped in the most recent Cordova 3.4.1
+		# Commented out patch for now.
+		# Patch for Cordova 3.4 and iOS 7.1 (remove when upgrading to Cordova 3.5)
 		# http://shazronatadobe.wordpress.com/2014/03/12/xcode-5-1-and-cordova-ios/
-		cp("config/native/ios/CDVCommandQueue.m", "platforms/ios/CordovaLib/Classes/CDVCommandQueue.m")
-		cp("config/native/ios/CDVViewController.m", "platforms/ios/CordovaLib/Classes/CDVViewController.m")
+		#cp("config/native/ios/CDVCommandQueue.m", "platforms/ios/CordovaLib/Classes/CDVCommandQueue.m")
+		#cp("config/native/ios/CDVViewController.m", "platforms/ios/CordovaLib/Classes/CDVViewController.m")
 	end
 end
 

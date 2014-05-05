@@ -18,7 +18,7 @@
  */
 //
 //  main.m
-//  EvoThings
+//  Evothings
 //
 //  Created by Mikael Kindborg.
 //  Copyright Evothings AB 2014. All rights reserved.

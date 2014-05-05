@@ -51,9 +51,6 @@ app.connect = function()
 	// Get contents of url text field.
     var ip = document.getElementById("hyper-url").value
 
-    // Save the field contents.
-    localStorage.setItem('hyper-saved-url', ip)
-
     // Add protocol and port if needed.
     var url = app.parseIpAddress(ip)
 
@@ -205,8 +202,10 @@ app.scan = function()
 
 app.connectTo = function(url)
 {
-	// Perhaps not needed anymore since we handle
-	// the 'beforeunload' event?
+	// Save the connect URL.
+    localStorage.setItem('hyper-saved-url', url)
+
+	// Destroy the socket so that the UDP port is free.
 	chrome.socket.destroy(app.socketId)
 	app.socketId = -1
 

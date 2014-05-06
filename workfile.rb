@@ -83,7 +83,11 @@ def addPlugins
 	# the build, and is not meaningful for Evothings client.
 	#addPlugin("org.apache.cordova.splashscreen")
 	addPlugin("org.apache.cordova.vibration")
-	addPlugin("org.chromium.socket")
+	if(defined?(CONFIG_CHROME_SOCKET_DIR))
+		addPlugin("org.chromium.socket", CONFIG_CHROME_SOCKET_DIR)
+	else
+		addPlugin("org.chromium.socket")
+	end
 	addPlugin("com.evothings.ble", "../cordova-ble")
 	addPlugin("org.apache.cordova.ibeacon", "../cordova-plugin-ibeacon")
 	# Should we ship the SMS plugin?
@@ -208,6 +212,8 @@ def copyIconsAndPlatformFiles
 	if(@platform == "android")
 		cp("config/native/android/src/com/evothings/evothingsclient/Evothings.java",
 			"platforms/android/src/com/evothings/evothingsclient/Evothings.java")
+
+		# TODO: edit the cordova-generated file instead.
 		cp("config/native/android/AndroidManifest.xml",
 			"platforms/android/AndroidManifest.xml")
 	end
@@ -257,7 +263,7 @@ def build
 
 	# Install debug build if switch "i" is given.
 	if(@install && @platform == "android")
-		sh "adb install -r platforms/android/bin/Evothings-debug.apk"
+		sh "adb install -r platforms/android/ant-build/Evothings-debug.apk"
 	end
 end
 

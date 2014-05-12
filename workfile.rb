@@ -98,11 +98,18 @@ def addPlugins
 end
 
 def fileRead(filePath)
-  File.open(filePath, "r") { |f| f.read.force_encoding("UTF-8") }
+	File.open(filePath, "r") { |f|
+		s = f.read
+		if(RUBY_VERSION >= '1.9')
+			return s.force_encoding("UTF-8")
+		else
+			return s
+		end
+	}
 end
 
 def fileSave(destFile, content)
-  File.open(destFile, "w") { |f| f.write(content) }
+	File.open(destFile, "w") { |f| f.write(content) }
 end
 
 # Read version number from config.xml

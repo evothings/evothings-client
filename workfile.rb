@@ -90,6 +90,12 @@ def addPlugins
 	end
 	addPlugin("com.evothings.ble", "../cordova-ble")
 	addPlugin("org.apache.cordova.ibeacon", "../cordova-plugin-ibeacon")
+
+	# Classic Bluetooth for Android.
+	if (@platform == "android")
+		addPlugin("com.megster.cordova.bluetoothserial", "https://github.com/don/BluetoothSerial.git")
+	end
+
 	# Should we ship the SMS plugin?
 	# Commenting out the plugin for now.
 	#if(@platform == "wp8")

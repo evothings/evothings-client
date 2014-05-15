@@ -22,6 +22,8 @@ require "./utils.rb"
 
 include FileUtils::Verbose
 
+@requiredCordovaVersion = "3.4.1"
+
 # Load localConfig.rb, if it exists. This file
 # contains configuration settings.
 lc = "#{File.dirname(__FILE__)}/localConfig.rb"
@@ -32,6 +34,19 @@ require lc if(File.exists?(lc))
 @platform = "android"
 @clean = false
 @install = false
+
+def testCordovaVersion
+	installedVersion = open("|cordova -v").read.strip
+	if(installedVersion < @requiredCordovaVersion)
+		puts "Fatal error:"
+		puts "Your installed cordova version is #{installedVersion}"
+		puts "Evothings Client requires at least #{@requiredCordovaVersion}"
+		puts
+		raise "CordovaVersionError"
+	end
+end
+
+testCordovaVersion
 
 def parseCommandParameters
 	if(defined?(CONFIG_DEFAULT_PLATFORM))
@@ -56,10 +71,15 @@ def createDirectories
 	mkdir_p "plugins"
 end
 
+@localPlugins = []
+
 def addPlugins
 	def addPlugin(name, location = name)
 		if(!File.exist?("plugins/#{name}"))
 			sh "cordova -d plugin add #{location}"
+		end
+		if(location != name)
+			@localPlugins << {:name=>name, :location=>location}
 		end
 	end
 
@@ -155,7 +175,17 @@ def createIndexFileWithVersionInfo
 	index = fileRead("config/www/index.html")
 	version = readVersionNumber()
 	gitInfo = readGitInfo("EvoThingsClient", ".")
-	versionString = "#{version}<br/>\n#{gitInfo}<br/>\n"
+	@localPlugins.each do |lp|
+		if(lp[:location].start_with?("http://") or lp[:location].start_with?("https://"))
+			cmd = "git ls-remote #{lp[:location]} HEAD"
+			puts cmd
+			hash = open("|#{cmd}").read.strip.split[0]
+			gitInfo << "\n<br/>" + "#{lp[:name]}: #{hash[0,8]}"
+		else
+			gitInfo << "\n<br/>" + readGitInfo(lp[:name], lp[:location])
+		end
+	end
+	versionString = "#{version}<br/>\n<br/>\n#{gitInfo}<br/>\n"
 	if(!index.gsub!("<version>", versionString))
 		error "Could not find <version> in #{src}"
 	end
@@ -270,6 +300,9 @@ def build
 
 	# Add all plugins.
 	addPlugins
+
+	# Recreate www/index.html with plugin version info.
+	createIndexFileWithVersionInfo
 
 	# Build platform.
 	sh "cordova build #{@platform}"

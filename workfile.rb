@@ -23,6 +23,7 @@ require "./utils.rb"
 include FileUtils::Verbose
 
 @requiredCordovaVersion = "3.4.1"
+@extraPlugins = []	# array of hashes with these keys: {:name, :location}
 
 # Load localConfig.rb, if it exists. This file
 # contains configuration settings.
@@ -81,6 +82,10 @@ def addPlugins
 		if(location != name)
 			@localPlugins << {:name=>name, :location=>location}
 		end
+	end
+
+	@extraPlugins.each do |ep|
+		addPlugin(ep[:name], ep[:location])
 	end
 
 	addPlugin("org.apache.cordova.battery-status")

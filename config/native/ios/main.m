@@ -35,11 +35,11 @@ static NSString* pathPlugins = @"/plugins";
 
 int main(int argc, char* argv[])
 {
-    @autoreleasepool {
+	@autoreleasepool {
 		[NSURLProtocol registerClass:[URLProtocolCordovaJs class]];
-        int retVal = UIApplicationMain(argc, argv, nil, @"AppDelegate");
-        return retVal;
-    }
+		int retVal = UIApplicationMain(argc, argv, nil, @"AppDelegate");
+		return retVal;
+	}
 }
 
 static NSError* createError()
@@ -66,13 +66,63 @@ static NSString* createMimeType(NSString* pathExtension)
 	return mimeType;
 }
 
+// Check if string contains substring.
+static BOOL stringContains(NSString* string, NSString* substring)
+{
+	if (!string) { return NO; }
+	if (!substring) { return NO; }
+	NSRange range = [string rangeOfString: substring];
+	BOOL found = (range.location != NSNotFound);
+	return found;
+}
+
+// Get the string starting with substring.
+static NSString* stringSubstring(NSString* string, NSString* substring)
+{
+	if (!string) { return nil; }
+	if (!substring) { return nil; }
+	NSRange range = [string rangeOfString: substring];
+	BOOL found = (range.location != NSNotFound);
+	if (found)
+	{
+		return [string substringFromIndex: range.location];
+	}
+	else
+	{
+		return nil;
+	}
+}
+
+// Get the Cordova part of the path.
+static NSString* cordovaSubPath(NSString* path)
+{
+	NSString* subpath;
+
+	if (!path) { return nil; }
+
+	subpath = stringSubstring(path, pathCordovaJs);
+	if (subpath) { return subpath; }
+
+	subpath = stringSubstring(path, pathCordovaPluginJs);
+	if (subpath) { return subpath; }
+
+	subpath = stringSubstring(path, pathPlugins);
+	if (subpath) { return subpath; }
+}
+
 @implementation URLProtocolCordovaJs
 
 + (BOOL)canInitWithRequest:(NSURLRequest*)theRequest
 {
-	return [theRequest.URL.path hasPrefix: pathCordovaJs]
-		|| [theRequest.URL.path hasPrefix: pathCordovaPluginJs]
-		|| [theRequest.URL.path hasPrefix: pathPlugins];
+	// If the URL is a file: URL we do not need to handle it.
+	if ([theRequest.URL isFileURL]) { return NO; }
+
+	NSString* path = theRequest.URL.path;
+	if (!path) { return NO; }
+
+	return stringContains(path, pathCordovaJs)
+		|| stringContains(path, pathCordovaPluginJs)
+		|| stringContains(path, pathPlugins);
 }
 
 + (NSURLRequest*)canonicalRequestForRequest:(NSURLRequest*)theRequest
@@ -83,19 +133,11 @@ static NSString* createMimeType(NSString* pathExtension)
 - (void)startLoading
 {
 	NSString* path = self.request.URL.path;
-	NSString* pathExtension = self.request.URL.pathExtension;
-	NSString* lastPathComponent = self.request.URL.lastPathComponent;
-	NSString* fileNameNoExtension = [lastPathComponent stringByDeletingPathExtension];
-	NSString* mimeType = createMimeType(pathExtension);
 
-	NSString* directory = [NSString
-		stringWithFormat: @"/www%@/",
-		[path stringByDeletingLastPathComponent]];
-
-	NSString* filePath = [[NSBundle mainBundle]
-		pathForResource: fileNameNoExtension
-		ofType: pathExtension
-		inDirectory: directory];
+	NSString* filePath = [NSString
+		stringWithFormat: @"%@/www%@",
+		[[NSBundle mainBundle] bundlePath],
+		cordovaSubPath(path)];
 
 	BOOL success = FALSE;
 
@@ -104,6 +146,8 @@ static NSString* createMimeType(NSString* pathExtension)
 		NSData* data = [NSData dataWithContentsOfFile: filePath];
 		if (nil != filePath)
 		{
+			NSString* pathExtension = self.request.URL.pathExtension;
+			NSString* mimeType = createMimeType(pathExtension);
 			NSURLResponse* response = [[NSURLResponse alloc]
 			   initWithURL: self.request.URL
 			   MIMEType: mimeType

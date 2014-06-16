@@ -27,6 +27,7 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 
 import java.io.IOException;
+import java.io.File;
 
 import org.apache.cordova.CordovaResourceApi.OpenForReadResult;
 import org.apache.cordova.*;
@@ -67,7 +68,7 @@ public class Evothings extends CordovaActivity
 			String localURL = getCordovaLocalFileURL(url);
 			if (null != localURL)
 			{
-				return handleCordovaURL(localURL);
+				return handleCordovaURL(view, localURL, url);
 			}
 			else
 			{
@@ -106,12 +107,23 @@ public class Evothings extends CordovaActivity
 			return null;
 		}
 
-		WebResourceResponse handleCordovaURL(String assetURL)
+		WebResourceResponse handleCordovaURL(WebView view, String assetURL, String originalURL)
 		{
 			try
 			{
 				CordovaResourceApi resourceApi = appView.getResourceApi();
 				Uri uri = Uri.parse(assetURL);
+				{
+					File f = resourceApi.mapUriToFile(uri);
+					// If file is not local, use parent handler.
+					if(f == null) {
+						return super.shouldInterceptRequest(view, originalURL);
+					}
+					// If file seems local but don't exist, use parent handler.
+					if(!f.exists()) {
+						return super.shouldInterceptRequest(view, originalURL);
+					}
+				}
 				String encoding = "UTF-8";
 				OpenForReadResult result = resourceApi.openForRead(uri, true);
 				return new WebResourceResponse(
@@ -122,6 +134,7 @@ public class Evothings extends CordovaActivity
 			catch (IOException e)
 			{
 				Log.e("Evothings", "File not found: " + assetURL);
+				Log.e("Evothings", e.toString());
 				// This results in a 404.
 				return new WebResourceResponse("text/plain", "UTF-8", null);
 			}

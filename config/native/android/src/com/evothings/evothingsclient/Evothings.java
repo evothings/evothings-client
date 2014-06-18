@@ -78,8 +78,8 @@ public class Evothings extends CordovaActivity
 
 		/**
 		 * Here we check for Cordova files and directories.
-		 * If the URL names a Cordova asset, the local URL
-		 * is returned. Otherwise null is returned.
+		 * @return If the URL names an existing Cordova asset,
+		 * the local URL is returned. Otherwise null is returned.
 		 */
 		String getCordovaLocalFileURL(String url)
 		{
@@ -107,23 +107,19 @@ public class Evothings extends CordovaActivity
 			return null;
 		}
 
-		WebResourceResponse handleCordovaURL(WebView view, String assetURL, String originalURL)
+		WebResourceResponse handleCordovaURL(
+			WebView view,
+			String assetURL,
+			String originalURL)
 		{
 			try
 			{
 				CordovaResourceApi resourceApi = appView.getResourceApi();
 				Uri uri = Uri.parse(assetURL);
-				{
-					File f = resourceApi.mapUriToFile(uri);
-					// If file is not local, use parent handler.
-					if(f == null) {
-						return super.shouldInterceptRequest(view, originalURL);
-					}
-					// If file seems local but don't exist, use parent handler.
-					if(!f.exists()) {
-						return super.shouldInterceptRequest(view, originalURL);
-					}
-				}
+
+				Log.i("@@@@@", "assetURL: " + assetURL);
+				Log.i("@@@@@", "uri: " + uri);
+
 				String encoding = "UTF-8";
 				OpenForReadResult result = resourceApi.openForRead(uri, true);
 				return new WebResourceResponse(
@@ -133,10 +129,7 @@ public class Evothings extends CordovaActivity
 			}
 			catch (IOException e)
 			{
-				Log.e("Evothings", "File not found: " + assetURL);
-				Log.e("Evothings", e.toString());
-				// This results in a 404.
-				return new WebResourceResponse("text/plain", "UTF-8", null);
+				return super.shouldInterceptRequest(view, originalURL);
 			}
 		}
 	}

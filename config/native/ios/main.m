@@ -108,6 +108,33 @@ static NSString* cordovaSubPath(NSString* path)
 
 	subpath = stringSubstring(path, pathPlugins);
 	if (subpath) { return subpath; }
+
+	return nil;
+}
+
+// Get the full Cordova file path in the app bundle.
+static NSString* cordovaFilePath(NSString* path)
+{
+	NSString* filePath = [NSString
+		stringWithFormat: @"%@/www%@",
+		[[NSBundle mainBundle] bundlePath],
+		cordovaSubPath(path)];
+	return filePath;
+}
+
+static BOOL pathIsCordovaJsFile(NSString* path)
+{
+	// First test if the path could be a local Cordova JS file.
+	BOOL isCordovaPath = stringContains(path, pathCordovaJs)
+		|| stringContains(path, pathCordovaPluginJs)
+		|| stringContains(path, pathPlugins);
+	if (!isCordovaPath) { return NO; }
+
+	// Now see if the file exists.
+	NSString* filePath = cordovaFilePath(path);
+	BOOL fileExists = [[NSFileManager defaultManager]
+		fileExistsAtPath: filePath];
+	return fileExists;
 }
 
 @implementation URLProtocolCordovaJs
@@ -120,9 +147,7 @@ static NSString* cordovaSubPath(NSString* path)
 	NSString* path = theRequest.URL.path;
 	if (!path) { return NO; }
 
-	return stringContains(path, pathCordovaJs)
-		|| stringContains(path, pathCordovaPluginJs)
-		|| stringContains(path, pathPlugins);
+	return pathIsCordovaJsFile(path);
 }
 
 + (NSURLRequest*)canonicalRequestForRequest:(NSURLRequest*)theRequest
@@ -133,18 +158,14 @@ static NSString* cordovaSubPath(NSString* path)
 - (void)startLoading
 {
 	NSString* path = self.request.URL.path;
-
-	NSString* filePath = [NSString
-		stringWithFormat: @"%@/www%@",
-		[[NSBundle mainBundle] bundlePath],
-		cordovaSubPath(path)];
+	NSString* filePath = cordovaFilePath(path);
 
 	BOOL success = FALSE;
 
 	if (nil != filePath)
 	{
 		NSData* data = [NSData dataWithContentsOfFile: filePath];
-		if (nil != filePath)
+		if (nil != data)
 		{
 			NSString* pathExtension = self.request.URL.pathExtension;
 			NSString* mimeType = createMimeType(pathExtension);

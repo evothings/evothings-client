@@ -117,9 +117,6 @@ public class Evothings extends CordovaActivity
 				CordovaResourceApi resourceApi = appView.getResourceApi();
 				Uri uri = Uri.parse(assetURL);
 
-				Log.i("@@@@@", "assetURL: " + assetURL);
-				Log.i("@@@@@", "uri: " + uri);
-
 				String encoding = "UTF-8";
 				OpenForReadResult result = resourceApi.openForRead(uri, true);
 				return new WebResourceResponse(

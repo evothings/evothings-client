@@ -54,12 +54,12 @@ public class Evothings extends CordovaActivity
 		return (android.os.Build.VERSION.SDK_INT <
 				android.os.Build.VERSION_CODES.HONEYCOMB)
 			? new CordovaWebViewClient(this, webView)
-			: new MyWebViewClient(this, webView);
+			: new EvothingsWebViewClient(this, webView);
 	}
 
-	public class MyWebViewClient extends IceCreamCordovaWebViewClient
+	public class EvothingsWebViewClient extends IceCreamCordovaWebViewClient
 	{
-		public MyWebViewClient(CordovaInterface cordova, CordovaWebView view)
+		public EvothingsWebViewClient(CordovaInterface cordova, CordovaWebView view)
 		{
 			super(cordova, view);
 		}

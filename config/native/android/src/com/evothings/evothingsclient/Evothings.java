@@ -28,6 +28,7 @@ import android.webkit.WebView;
 
 import java.io.IOException;
 import java.io.File;
+import java.io.FileNotFoundException;
 
 import org.apache.cordova.CordovaResourceApi.OpenForReadResult;
 import org.apache.cordova.*;
@@ -124,9 +125,15 @@ public class Evothings extends CordovaActivity
 					encoding,
 					result.inputStream);
 			}
-			catch (IOException e)
+			catch (FileNotFoundException e)
 			{
 				return super.shouldInterceptRequest(view, originalURL);
+			}
+			catch (IOException e)
+			{
+				LOG.e("EvothingsWebViewClient", "Error occurred while loading a file (returning a 404).", e);
+				// Results in a 404.
+				return new WebResourceResponse("text/plain", "UTF-8", null);
 			}
 		}
 	}

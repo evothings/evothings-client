@@ -12,6 +12,9 @@ app.initialize = function()
 
 app.onDeviceReady = function()
 {
+	// Display the last used ip address.
+	app.setSavedIpAddress()
+
 	// Networking API won't work until device is ready.
 	// The Scan button is blank initially, and the text
 	// of the button is set here, when device is ready.
@@ -47,6 +50,10 @@ app.connect = function()
 	// Add url to list and connect.
 	if (url)
 	{
+		// Save the URL.
+		localStorage.setItem('hyper-saved-url', url)
+
+		// Open URL.
 		app.connectTo(url)
 	}
 	else
@@ -199,9 +206,6 @@ app.destroySocketAndTimer = function()
 
 app.connectTo = function(url)
 {
-	// Save the connect URL.
-	localStorage.setItem('hyper-saved-url', url)
-
 	// Clean up.
 	app.destroySocketAndTimer()
 
@@ -318,7 +322,6 @@ app.openBrowser = function(url)
 	window.open(url, '_blank', 'location=yes')
 }
 
-// Display the last used ip address.
-app.setSavedIpAddress()
-
+// Main entry point.
 app.initialize()
+

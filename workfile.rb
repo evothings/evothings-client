@@ -1,7 +1,8 @@
 # Build script for Evothings client app.
 #
 # Possible switches are:
-# c - clean before building
+# c - clean target platform before building
+# ca - clean everything before building (removes plugins and target platform)
 # i - install after building
 # android - build Android
 # wp8 - build Windows Phone 8
@@ -23,7 +24,15 @@ require "./utils.rb"
 include FileUtils::Verbose
 
 @requiredCordovaVersion = "3.4.1"
+
+# TODO: Document how this is used. Not set in this file.
+# Is it optionally set in localConfig.rb ?
 @extraPlugins = []	# array of hashes with these keys: {:name, :location}
+
+# List of plugins installed from the local file system
+# or from a custom web location.
+# This is an array of hashes: {:name=>name, :location=>location}
+@localPlugins = []
 
 # Load localConfig.rb, if it exists. This file
 # contains configuration settings.
@@ -34,6 +43,7 @@ require lc if(File.exists?(lc))
 # Default platform is Android.
 @platform = "android"
 @clean = false
+@cleanall = false
 @install = false
 
 def testCordovaVersion
@@ -47,8 +57,6 @@ def testCordovaVersion
 	end
 end
 
-testCordovaVersion
-
 def parseCommandParameters
 	if(defined?(CONFIG_DEFAULT_PLATFORM))
 		@platform = CONFIG_DEFAULT_PLATFORM
@@ -58,6 +66,8 @@ def parseCommandParameters
 		case (arg)
 			when "c"
 				@clean = true
+			when "ca"
+				@cleanall = true
 			when "i"
 				@install = true
 			when "android", "wp8", "ios"
@@ -71,8 +81,6 @@ def createDirectories
 	mkdir_p "platforms"
 	mkdir_p "plugins"
 end
-
-@localPlugins = []
 
 def addPlugins
 	def addPlugin(name, location = name)
@@ -88,31 +96,28 @@ def addPlugins
 		addPlugin(ep[:name], ep[:location])
 	end
 
+	# Add standard Cordova plugins.
 	addPlugin("org.apache.cordova.battery-status")
 	addPlugin("org.apache.cordova.camera")
 	addPlugin("org.apache.cordova.console")
-	addPlugin("org.apache.cordova.contacts")
 	addPlugin("org.apache.cordova.device")
 	addPlugin("org.apache.cordova.device-motion")
 	addPlugin("org.apache.cordova.device-orientation")
 	addPlugin("org.apache.cordova.dialogs")
-	addPlugin("org.apache.cordova.file")
-	addPlugin("org.apache.cordova.file-transfer")
 	addPlugin("org.apache.cordova.geolocation")
 	addPlugin("org.apache.cordova.globalization")
 	addPlugin("org.apache.cordova.inappbrowser")
-	addPlugin("org.apache.cordova.media")
-	addPlugin("org.apache.cordova.media-capture")
 	addPlugin("org.apache.cordova.network-information")
-	# Splashscreen requires adding splashscreen media files to
-	# the build, and is not meaningful for Evothings client.
-	#addPlugin("org.apache.cordova.splashscreen")
 	addPlugin("org.apache.cordova.vibration")
+
+	# Socket plugin.
 	if(defined?(CONFIG_CHROME_SOCKET_DIR))
 		addPlugin("org.chromium.socket", CONFIG_CHROME_SOCKET_DIR)
 	else
 		addPlugin("org.chromium.socket")
 	end
+
+	# Plugins on the local file system.
 	addPlugin("com.evothings.ble", "../cordova-ble")
 	addPlugin("org.apache.cordova.ibeacon", "../cordova-plugin-ibeacon")
 
@@ -121,11 +126,16 @@ def addPlugins
 		addPlugin("com.megster.cordova.bluetoothserial", "https://github.com/don/BluetoothSerial.git")
 	end
 
-	# Should we ship the SMS plugin?
-	# Commenting out the plugin for now.
-	#if(@platform == "wp8")
-	#	addPlugin("com.evothings.ble", "../phonegap-sms-plugin")
-	#end
+	# Standard plugins that are not included.
+	#addPlugin("org.apache.cordova.contacts")
+	#addPlugin("org.apache.cordova.file")
+	#addPlugin("org.apache.cordova.file-transfer")
+	#addPlugin("org.apache.cordova.media")
+	#addPlugin("org.apache.cordova.media-capture")
+	#addPlugin("org.apache.cordova.splashscreen")
+
+	# SMS plugin is not included.
+	#addPlugin("com.evothings.ble", "../phonegap-sms-plugin")
 end
 
 def fileRead(filePath)
@@ -268,25 +278,42 @@ def copyIconsAndPlatformFiles
 
 	# Copy native iOS source files.
 	if(@platform == "ios")
+		# Copy custom main file.
 		cp("config/native/ios/main.m", "platforms/ios/EvoThings/main.m")
-		cp("config/native/ios/EvoThings-Info.plist", "platforms/ios/EvoThings/EvoThings-Info.plist")
 
-		# According to the page below, this patch in shipped in the most recent Cordova 3.4.1
-		# Commented out patch for now.
-		# Patch for Cordova 3.4 and iOS 7.1 (remove when upgrading to Cordova 3.5)
-		# http://shazronatadobe.wordpress.com/2014/03/12/xcode-5-1-and-cordova-ios/
-		#cp("config/native/ios/CDVCommandQueue.m", "platforms/ios/CordovaLib/Classes/CDVCommandQueue.m")
-		#cp("config/native/ios/CDVViewController.m", "platforms/ios/CordovaLib/Classes/CDVViewController.m")
+		# Copy customised AppDelegate class.
+		cp("config/native/ios/AppDelegate.m", "platforms/ios/EvoThings/Classes/AppDelegate.m")
+
+		# Insert version number into customised Info-plist.
+		fileSave(
+			"platforms/ios/EvoThings/EvoThings-Info.plist",
+			fileRead("config/native/ios/EvoThings-Info.plist").gsub(
+				"EVOTHINGS_CLIENT_VERSION_NUMBER",
+				readVersionNumber()))
 	end
 end
 
 def build
+	# Check that the Cordova version installed is
+	# compatible with build script.
+	testCordovaVersion
+
 	# Get command line parameters.
 	parseCommandParameters
 
-	# Remove platform(s) if switch "c" (clean) is given.
+	# Remove target platform if switch "c" (clean) is given.
 	if(@clean)
 		sh "cordova -d platform remove #{@platform}"
+	end
+
+	# Clean all platforms and plugins if switch "ca" (cleanall) is given.
+	if(@cleanall)
+		# TODO: Rather than hardcoding platforms to remote,
+		# we would use "cordova platform list" to get the
+		# installed platforms and remove them.
+		sh "cordova -d platform remove ios"
+		sh "cordova -d platform remove android"
+		FileUtils.rm_rf(Dir.glob("plugins/*"))
 	end
 
 	# Create www/index.html with current version info.

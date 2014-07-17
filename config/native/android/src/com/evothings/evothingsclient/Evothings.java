@@ -19,6 +19,7 @@ under the License.
 
 package com.evothings.evothingsclient;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -40,10 +41,59 @@ public class Evothings extends CordovaActivity
 	{
 		super.onCreate(savedInstanceState);
 		super.init();
-		// Set by <content src="index.html" /> in config.xml
-		super.loadUrl(Config.getStartUrl());
-		//super.loadUrl("file:///android_asset/www/index.html")
+
+		// If the intent has a data string we load it.
+		Intent intent = getIntent();
+    	if (isEvothingsIntent(intent))
+    	{
+    		openEvothingsIntent(intent);
+    	}
+    	else
+    	{
+    		// This is the original Cordova page loading code.
+			// Set by <content src="index.html" /> in config.xml
+			super.loadUrl(Config.getStartUrl());
+			//super.loadUrl("file:///android_asset/www/index.html")
+    	}
 	}
+
+    @Override
+    protected void onNewIntent(Intent intent)
+    {
+    	if (isEvothingsIntent(intent))
+    	{
+    		openEvothingsIntent(intent);
+    	}
+		else
+		{
+        	super.onNewIntent(intent);
+        }
+    }
+
+    protected boolean isEvothingsIntent(Intent intent)
+    {
+    	String url = intent.getDataString();
+    	if (null != url)
+    	{
+    		return url.startsWith("evothings");
+    	}
+		else
+		{
+        	return false;
+        }
+    }
+
+    protected void openEvothingsIntent(Intent intent)
+    {
+		// Get the URL string of the intent.
+		String url = intent.getDataString();
+
+		// Strip off "evothings" from the URL and replace with "http".
+		url = "http" + url.substring(9);
+
+		// Load the URL in the Cordova web view.
+		this.appView.loadUrlIntoView(url);
+    }
 
 	// For Cordova 3.1+
 	@Override

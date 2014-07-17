@@ -131,7 +131,6 @@
 		timeoutInterval: 10];
     [self.viewController.webView loadRequest: request];
 
-	// TODO: Should we keep this?
     // all plugins will get the notification, and their handlers will be called
     [[NSNotificationCenter defaultCenter] postNotification:[NSNotification notificationWithName:CDVPluginHandleOpenURLNotification object:url]];
 

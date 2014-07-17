@@ -23,7 +23,7 @@ require "./utils.rb"
 
 include FileUtils::Verbose
 
-@requiredCordovaVersion = "3.4.1"
+@requiredCordovaVersion = "3.5.0"
 
 # TODO: Document how this is used. Not set in this file.
 # Is it optionally set in localConfig.rb ?
@@ -84,9 +84,13 @@ end
 
 def addPlugins
 	def addPlugin(name, location = name)
+		# Add plugin if not already installed.
 		if(!File.exist?("plugins/#{name}"))
 			sh "cordova -d plugin add #{location}"
 		end
+		# If a specific location is given, this is considered to be a
+		# "local" plugin, which will be scanned for git version info.
+		# (location can be a file path or URL).
 		if(location != name)
 			@localPlugins << {:name=>name, :location=>location}
 		end
@@ -158,12 +162,25 @@ def readVersionNumber
 	config = fileRead("./www/config.xml")
 
 	# Get version number from config.xml.
-	versionMatch = config.scan(/version="(.*?)"/)
-	if(versionMatch.empty?)
-		error "Version not found in config.xml!"
+	match = config.scan(/version="(.*?)"/)
+	if(match.empty?)
+		raise "Version not found in config.xml"
 	end
 
-	return versionMatch[0][0]
+	return match[0][0]
+end
+
+# Read the Android version code from config.xml
+def readAndroidVersionCode
+	config = fileRead("./www/config.xml")
+
+	# Get version code from config.xml.
+	match = config.scan(/android-versionCode="(.*?)"/)
+	if(match.empty?)
+		raise "Android version code not found in config.xml"
+	end
+
+	return match[0][0]
 end
 
 def readGitInfo(name, location)
@@ -202,7 +219,7 @@ def createIndexFileWithVersionInfo
 	end
 	versionString = "#{version}<br/>\n<br/>\n#{gitInfo}<br/>\n"
 	if(!index.gsub!("<version>", versionString))
-		error "Could not find <version> in #{src}"
+		raise "Could not find <version> in #{src}"
 	end
 	fileSave("www/index.html", index)
 end
@@ -268,21 +285,29 @@ def copyIconsAndPlatformFiles
 
 	# Copy native Android source files.
 	if(@platform == "android")
+		# Copy customised Activity class.
 		cp("config/native/android/src/com/evothings/evothingsclient/Evothings.java",
 			"platforms/android/src/com/evothings/evothingsclient/Evothings.java")
 
-		# TODO: edit the cordova-generated file instead.
-		cp("config/native/android/AndroidManifest.xml",
-			"platforms/android/AndroidManifest.xml")
+		# Insert version info into manifest file.
+		fileSave(
+			"platforms/android/AndroidManifest.xml",
+			fileRead("config/native/android/AndroidManifest.xml").gsub(
+				"EVOTHINGS_CLIENT_VERSION_NUMBER",
+				readVersionNumber()).gsub(
+					"EVOTHINGS_CLIENT_ANDROID_VERSION_CODE",
+					readAndroidVersionCode()))
 	end
 
 	# Copy native iOS source files.
 	if(@platform == "ios")
 		# Copy custom main file.
-		cp("config/native/ios/main.m", "platforms/ios/EvoThings/main.m")
+		cp("config/native/ios/main.m",
+			"platforms/ios/EvoThings/main.m")
 
 		# Copy customised AppDelegate class.
-		cp("config/native/ios/AppDelegate.m", "platforms/ios/EvoThings/Classes/AppDelegate.m")
+		cp("config/native/ios/AppDelegate.m",
+			"platforms/ios/EvoThings/Classes/AppDelegate.m")
 
 		# Insert version number into customised Info-plist.
 		fileSave(

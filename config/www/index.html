@@ -1,72 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
-    <meta name="format-detection" content="telephone=no" />
-    <script src="js/hyper-os.js"></script>
-    <script src="js/hyper-viewport.js"></script>
-    <title>Evothings Client</title>
-	<link rel="stylesheet"
-		href="libs/jquery.mobile/css/themes/evothings/evothings.min.css">
-	<link rel="stylesheet"
-		href="libs/jquery.mobile/css/themes/default/jquery.mobile.structure-1.3.2.min.css">
+
+	<meta charset="utf-8" />
+	<meta name="format-detection" content="telephone=no" />
+
+	<script src="js/hyper-os.js"></script>
+	<script src="js/hyper-viewport.js"></script>
+
+	<title>Evothings Client</title>
+	
+	<style>
+		@import 'evothings.css';
+
+		
+	</style>
+
 	<script src="libs/jquery/jquery.js"></script>
-	<script src="libs/jquery.mobile/js/jquery.mobile-1.3.2.min.js"></script>
 	<!-- <script src="js/hyper-jquery-mobile-ios7-patch.js"></script> -->
+
 </head>
-<body>
 
-<div id="hyper-page-main" data-role="page" data-theme="a">
-	<div data-role="header">
-		<!-- <a href="#hyper-page-settings"
-			data-transition="none"
-			data-mini="true"
-			class="ui-btn-left">
-			Settings</a> -->
-		<h1>Evothings</h1>
-		<a href="#hyper-page-info"
-			data-transition="none"
-			data-mini="true"
-			class="ui-btn-right">
-			Info</a>
-	</div>
+<body ontouchstart="">
 
-	<div data-role="content">
-		<div>
-			<a id="hyper-button-scan" data-role="button"
-				data-inline="false" data-theme="e"
-				onclick="app.scan()">&nbsp;</a>
-		</div>
+	<header>
+		<button class="back"><img src="gfx/back.png" height="100%" /></button>
+		&nbsp;<img class="logotype" src="gfx/logo.png" height="90%" alt="Evothings"
+			title="Evothings" />&nbsp;
+		<!--<a href="#hyper-page-info" class="ui-btn-right">Info</a>-->
+	</header>
 
-		<ul id="hyper-server-list" data-role="listview"
-			data-inset="true" data-theme="a">
-		</ul>
+	<main>
 
-		<div>
-		<p>Connect with IP-address:</p>
-		<input id="hyper-url"
-			placeholder="Enter connect address"
-			type="url"
-			data-clear-btn="true">
+		<br />
 
-			<a id="hyper-button-connect" data-role="button"
-				data-inline="false" data-theme="a"
-				onclick="app.connect()">Connect to IP-address</a>
-		</div>
-	</div>
-</div>
+		<button id="hyper-button-scan" class="wavegreen" onclick="app.scan()">SCAN FOR WORKBENCH</button>
 
-<div id="hyper-page-info" data-role="page">
-	<div data-role="header" data-position="fixed">
-		<a href="#hyper-page-main"
-			data-transition="none"
-			data-mini="true"
-			class="ui-btn-left">
-			Back</a>
-		<h1>Info</h1>
-	</div>
+		<ul id="hyper-server-list"></ul>
 
-	<div data-role="content">
+		<h2>Connect with IP-address:</h2>
+		<input id="hyper-url" type="url" />
+
+		<!--<button id="hyper-button-connect" onclick="app.connect()">CONNECT TO IP-ADDRESS</button>-->
+		<button id="hyper-button-connect" class="stone">CONNECT</button>
+
+	</main>
+
+	<article id="info">
+
 		<h3>Evothings Client</h3>
 		<p>Use this app with the Evothings Workbench desktop application to develop mobile apps for IoT in HTML5/JavaScript. The desktop application is available at <a href="javascript:app.openBrowser('http://evothings.com')">evothings.com</a>.</p>
 
@@ -84,11 +65,11 @@
 		<p>Email: <a href="mailto:alex@evothings.com">alex@evothings.com</a></p>
 		<p>App Version: <version></p>
 		<p><small>Copyright &copy; 2013-2014 Evothings AB</small></p>
-	</div>
-</div>
 
-<script src="cordova.js"></script>
-<script src="js/app.js"></script>
+	</article>
+
+	<script src="cordova.js"></script>
+	<script src="js/app.js"></script>
 
 </body>
 </html>

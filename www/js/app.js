@@ -278,19 +278,19 @@ app.displayServers = function()
 
 app.setConnectButtonStateToConnecting = function()
 {
-	$('#hyper-button-connect .ui-btn-text').html('Connecting')
+	$('#hyper-button-connect').html('Connecting')
 }
 
 app.setConnectButtonStateToNormal = function()
 {
-	$('#hyper-button-connect .ui-btn-text').html('Connect')
+	$('#hyper-button-connect').html('Connect')
 }
 
 app.setScanButtonStateToReadyToScan = function()
 {
 	if (hyper.isWP())
 	{
-		$('#hyper-button-scan .ui-btn-text').html('Scan not available')
+		$('#hyper-button-scan').html('Scan not available')
 		$('#hyper-button-scan').css('background', 'rgb(128,128,128)')
 		$('#hyper-button-scan').css('border-color', 'rgb(128,128,128)')
 		// This does not seem to work.
@@ -304,17 +304,17 @@ app.setScanButtonStateToReadyToScan = function()
 
 app.setScanButtonStateToNormal = function()
 {
-	$('#hyper-button-scan .ui-btn-text').html('Scan to connect')
+	$('#hyper-button-scan').html('SCAN FOR WORKBENCH')
 }
 
 app.setScanButtonStateToScanning = function()
 {
-	$('#hyper-button-scan .ui-btn-text').html('Scanning')
+	$('#hyper-button-scan').html('ABORT SCAN')
 }
 
 app.setScanButtonStateToError = function()
 {
-	$('#hyper-button-scan .ui-btn-text').html('Scan failed')
+	$('#hyper-button-scan').html('SCAN FAILED')
 }
 
 app.openBrowser = function(url)

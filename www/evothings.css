@@ -1,0 +1,292 @@
+/* Common styles for Evothings examples and client. */
+
+@import 'fonts/ProximaNova.css';
+
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+
+	font-family: 'Proxima Nova Regular', sans-serif;
+	font-weight: normal;
+
+	background: rgb(255,255,255);
+
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+body {
+	margin: 0 8px 0 8px;
+	font-size: 84%;
+	font-size: 5vmin;
+}
+
+/* Add a top margin to the content corresponding to the height of the header. */
+body::before {
+	display: block;
+	content: '\0000a0'; /* Non-breaking space (&nbsp;) */
+	font-size: 180%; /* Same as the header's font size. */
+	line-height: 200%; /* Slighly more than the header's line-height. */
+	height: 10%;
+}
+
+/* Add a bottom margin. */
+body::after {
+	display:block;
+	content: '';
+	height: 8px;
+}
+
+/* The header's height is determined by the contained text's font size. */
+header {
+	box-sizing: border-box; /* Width & height excludes padding, border & margin. */
+
+	position: fixed;
+	top: 0;
+
+	width: 100%;
+	height: 10%;
+	
+	margin: 0 -8px 8px -8px;
+	/* Left padding should correspond to the back button's width. */
+	padding: 1% 2% 1% 2%;
+
+	font-size: 180%;
+	line-height: 100%;
+	text-align: center;
+	vertical-align: middle;
+
+	background: rgb(243,243,243);
+
+	z-index: 1000;
+}
+header button.back {
+	position: absolute;
+	left: 0;
+
+	width: 10%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+
+	/* Font size is percentage of the header's font size. */
+	font-size: 50%;
+	color: #000;
+
+	background: none;
+
+	border-radius: 0;
+	border: none;
+
+	box-shadow: none;
+}
+
+header h1 {
+	width: 100%;
+	margin: 0;
+	padding: 0;
+
+	font-size: inherit;
+	line-height: inherit;
+	font-weight: normal;
+	text-align: center;
+	vertical-align: middle;
+	color: #eee;
+
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+input[type="text"],input[type="url"] {
+	font-family: inherit;
+	font-size: 100%;
+	color: #000;
+
+	padding: 7px 14px 7px 14px;
+
+	border-radius: 4px;
+	border: none;
+
+	background: #f3f3f3;
+}
+
+button {
+	font-family: 'Proxima Nova Black';
+	font-size: 100%;
+	line-height: 100%;
+
+	color: #fff;
+
+	padding: 9px 13px 8px 13px;
+
+	border-radius: 4px;
+	border: none;
+
+	box-shadow: none;
+}
+button:active, button.pressed {
+	box-shadow: inset 0 5px 9px -9px #000;
+}
+button:focus {
+	outline: none;
+}
+
+canvas {
+	border: 1px solid #000;
+}
+
+h1 {
+	font-family: 'Proxima Nova Black';
+}
+
+h2,h3,h4,h5,h6 {
+	font-family: 'Proxima Nova Bold';
+}
+
+h2 { font-size: 120%; }
+
+h3 { font-size: 100%; }
+
+p {
+	font-size: 120%;
+}
+
+h1.box,h2.box,h3.box,h4.box {
+	margin: 0;
+	padding-left: 1%;
+
+	line-height: 150%;
+	color: #fff;
+	vertical-align: middle;
+
+	background-color: rgb(33,70,92);
+	border-top-left-radius:6px;
+	border-top-right-radius:6px;
+}
+
+div.box {
+	box-sizing: border-box;
+	width: 100%;
+	padding: 1%;
+	border: 1px solid rgb(33,70,92);
+}
+
+div.box canvas {
+	border: none; /* Remove the border, as the box already has one. */
+}
+
+article {
+	display: none;
+}
+
+
+
+
+/*                   COLORS                 */
+/* ---------------------------------------- */
+
+/* Color: "Soft Red"
+   ----------------- */
+.color_softred { color: #e15a64; }
+.bg_softred,input.softred,button.softred {
+	background-color: #e15a64;
+}
+button.softred:active, button.softred.pressed {
+	background-color: #cb414b;
+}
+
+/* Color: "Bright Light"
+   --------------------- */
+.color_brightlight { color: #ecd53b; }
+.bg_brightlight,input.brightlight,button.brightlight {
+	background-color: #ecd53b;
+}
+button.brightlight:active, button.brightlight.pressed {
+	background-color: #d9c022;
+}
+
+/* Color: "Wave Green"
+   ------------------- */
+.color_wavegreen { color: #54dfb3; }
+.bg_wavegreen,input.wavegreen,button.wavegreen {
+	background-color: #54dfb3;
+}
+button.wavegreen:active, button.wavegreen.pressed {
+	background-color: #3aca9c;
+}
+
+/* Color: "Blue Hue"
+   ------------------- */
+.color_bluehue { color: #6bc6ce; }
+.bg_bluehue,input.bluehue,button.bluehue {
+	background-color: #6bc6ce;
+}
+button.bluehue:active, button.bluehue.pressed {
+	background-color: #52afb8;
+}
+
+/* Color: "Indigo"
+   ------------------- */
+.color_indigo { color: #b48b9b; }
+.bg_indigo,input.indigo,button.indigo {
+	background-color: #b48b9b;
+}
+button.indigo:active, button.indigo.pressed {
+	background-color: #9c7283;
+}
+
+/* Color: "Arctic"
+   ------------------- */
+.color_arctic { color: #f3f3f3; }
+.bg_arctic,input.arctic,button.arctic {
+	background-color: #f3f3f3;
+}
+button.arctic:active, button.arctic.pressed {
+	background-color: #656565;
+}
+
+/* Color: "Aluminium"
+   ------------------- */
+.color_aluminium { color: #e2e2e2; }
+.bg_aluminium,input.aluminium,button.aluminium {
+	background-color: #e2e2e2;
+}
+button.aluminium:active, button.aluminium.pressed {
+	background-color: #c0c0c0;
+}
+
+/* Color: "Charcoal"
+   ------------------- */
+.color_charcoal { color: #b9b9b9; }
+.bg_charcoal,input.charcoal,button.charcoal {
+	background-color: #b9b9b9;
+}
+button.charcoal:active, button.charcoal.pressed {
+	background-color: #9d9d9d;
+}
+
+/* Color: "Stone"
+   ------------------- */
+.color_stone { color: #777777; }
+.bg_stone,input.stone,button.stone {
+	background-color: #777777;
+}
+button.stone:active, button.stone.pressed {
+	background-color: #656565;
+}
+
+/* Color: "Jet Black"
+   ------------------- */
+.color_jetblack { color: #070707; }
+.bg_jetblack,input.jetblack,button.jetblack {
+	background-color: #070707;
+}
+button.jetblack:active, button.jetblack.pressed {
+	background-color: #000000;
+}

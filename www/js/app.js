@@ -14,6 +14,28 @@ app.initialize = function()
 
 	$(function() {
 		FastClick.attach(document.body)
+
+		/* Add a clear button to input fields. */
+		$('input').each(function() {
+			var $input_field = $(this)
+
+			$input_field.bind('focus', function() {
+				var $clear_button = $('<button class="clear softred">X</button>')
+				$(this).after($clear_button)
+				$clear_button.bind('click', function () {
+					$input_field.val('')
+				})
+			})
+
+			$input_field.bind('blur', function() {
+				var $field = $(this)
+				/*  Use a delay to make sure that the button isn't removed
+					before it's clicked. */
+				setTimeout(function() {
+					$field.siblings('button.clear').remove()
+				}, 0)
+			})
+		})
 	})
 }
 

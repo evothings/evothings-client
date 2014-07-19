@@ -7,7 +7,14 @@ app.broadcastTimer = null
 
 app.initialize = function()
 {
+
 	document.addEventListener('deviceready', app.onDeviceReady, false)
+
+	$('#info_button').bind('click', {articleId: 'info'}, app.showArticle)
+
+	$(function() {
+		FastClick.attach(document.body)
+	})
 }
 
 app.onDeviceReady = function()
@@ -64,9 +71,16 @@ app.connect = function()
 
 app.scan = function()
 {
+
 	if (hyper.isWP())
 	{
 		// Scan is not available in Windows Phone.
+		return
+	}
+
+	if (app.broadcastTimer != null) {
+		app.destroySocketAndTimer()
+		app.setScanButtonStateToNormal()
 		return
 	}
 
@@ -178,15 +192,23 @@ app.scan = function()
 	// Clean up existing scan if any.
 	app.destroySocketAndTimer()
 
+	// Clear the list of servers.
+	$('#hyper-server-list').html('')
+
 	// Set button state.
 	app.setScanButtonStateToScanning()
 
-	// Open UDP connection.
-	chrome.socket.create('udp', {}, function(createInfo)
-	{
-		app.socketId = createInfo.socketId
-		bind()
-	})
+	try {
+		// Open UDP connection.
+		chrome.socket.create('udp', {}, function(createInfo)
+		{
+			app.socketId = createInfo.socketId
+			bind()
+		})
+	} catch (err) { 
+		app.setScanButtonStateToNormal()
+		console.error('Failed to create socket: ' + err)
+	}
 }
 
 app.destroySocketAndTimer = function()
@@ -320,6 +342,28 @@ app.setScanButtonStateToError = function()
 app.openBrowser = function(url)
 {
 	window.open(url, '_system', 'location=yes')
+}
+
+app.showArticle = function(event)
+{
+	var articlePage = $('article#' + event.data.articleId)
+
+	$(this).toggleClass('pressed')
+	$('main').toggle()
+	articlePage.toggle()
+
+	/*if (articlePage.is(":visible"))
+		$('header button.back').show()
+	else
+		$('header button.back').hide()*/
+}
+
+app.showMain = function()
+{
+	$('main').show()
+	$('article').hide()
+	$('#info_button').removeClass('pressed')
+	$('header button.back').hide()
 }
 
 // Main entry point.

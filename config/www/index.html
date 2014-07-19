@@ -13,36 +13,55 @@
 	<style>
 		@import 'evothings.css';
 
-		
+		button.back { display: none; }
+
+		#info_button {
+			position: absolute;
+			right: 2%;
+		}
 	</style>
 
 	<script src="libs/jquery/jquery.js"></script>
+	<script src="libs/fastclick.js"></script>
 	<!-- <script src="js/hyper-jquery-mobile-ios7-patch.js"></script> -->
 
 </head>
 
+<!-- ontouchstart="" enables low delay CSS transitions. -->
 <body ontouchstart="">
 
 	<header>
-		<button class="back"><img src="gfx/back.png" height="100%" /></button>
-		&nbsp;<img class="logotype" src="gfx/logo.png" height="90%" alt="Evothings"
-			title="Evothings" />&nbsp;
-		<!--<a href="#hyper-page-info" class="ui-btn-right">Info</a>-->
+		<!--<button class="back" onclick="app.showMain()">
+			<img src="gfx/arrow_left.svg" height="50%" />
+		</button>-->
+
+		<img class="logotype" src="gfx/logo.svg" height="90%" alt="Evothings"
+			title="Evothings" />
+
+		<button id="info_button" class="aluminium">Info</button>
+		<!--<button class="menu" onclick="app.showArticle('info')">
+			<img src="gfx/menu.svg" height="70%" />
+		</button>-->
 	</header>
 
 	<main>
 
-		<br />
+		<p>Hi! Begin by connecting to Evothings Workbench.</p>
 
-		<button id="hyper-button-scan" class="wavegreen" onclick="app.scan()">SCAN FOR WORKBENCH</button>
+		<button id="hyper-button-scan" class="wavegreen" onclick="app.scan()">
+			SCAN FOR WORKBENCH
+		</button>
 
-		<ul id="hyper-server-list"></ul>
+		<ul id="hyper-server-list" class="arctic clickable"><!--<li><strong>Touch here to connect to:</strong><br/>erics-mbp-3.bredbandsbolaget.se<br /><small>192.168.1.113:4042</small></li><li><strong>Touch here to connect to:</strong><br/>erics-mbp-3.bredbandsbolaget.se<br /><small>192.168.1.113:4042</small></li><li><strong>Touch here to connect to:</strong><br/>erics-mbp-3.bredbandsbolaget.se<br /><small>192.168.1.113:4042</small></li><li><strong>Touch here to connect to:</strong><br/>erics-mbp-3.bredbandsbolaget.se<br /><small>192.168.1.113:4042</small></li><li><strong>Touch here to connect to:</strong><br/>erics-mbp-3.bredbandsbolaget.se<br /><small>192.168.1.113:4042</small></li><li><strong>Touch here to connect to:</strong><br/>erics-mbp-3.bredbandsbolaget.se<br /><small>192.168.1.113:4042</small></li>--></ul>
 
 		<h2>Connect with IP-address:</h2>
 		<input id="hyper-url" type="url" />
 
-		<!--<button id="hyper-button-connect" onclick="app.connect()">CONNECT TO IP-ADDRESS</button>-->
-		<button id="hyper-button-connect" class="stone">CONNECT</button>
+		<button id="hyper-button-connect" onclick="app.connect()" class="stone">
+			CONNECT
+		</button>
+
+		<br /><br />
 
 	</main>
 
@@ -63,7 +82,10 @@
 
 		<h3>Contact</h3>
 		<p>Email: <a href="mailto:alex@evothings.com">alex@evothings.com</a></p>
-		<p>App Version: <version></p>
+		<p>App Version: 0.7.4<br/>
+<br/>
+EvoThingsClient: e7d53793 modified<br/>
+</p>
 		<p><small>Copyright &copy; 2013-2014 Evothings AB</small></p>
 
 	</article>

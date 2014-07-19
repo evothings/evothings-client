@@ -219,7 +219,7 @@ def createIndexFileWithVersionInfo
 	end
 	versionString = "#{version}<br/>\n<br/>\n#{gitInfo}<br/>\n"
 	if(!index.gsub!("<version>", versionString))
-		raise "Could not find <version> in #{src}"
+		raise "Could not find <version> in config/www/index.html"
 	end
 	fileSave("www/index.html", index)
 end

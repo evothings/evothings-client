@@ -259,9 +259,13 @@ strong {
 ul {
 	list-style-type: none;
 	padding: 0;
+
+	font-size: inherit;
 }
 ul li {
 	padding: 4% 4%;
+
+	font-size: 63%;
 
 	border-radius: 4px;
 	border: none;

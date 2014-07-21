@@ -21,18 +21,21 @@ html, body {
 	-webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 body {
-	margin: 0 5% 0 5%;
-	font-size: 84%;
-	font-size: 5vmin;
+	margin: 0 6.25% 0 6.25%;
+	font-size: 150%;
+	font-size: 7.5vmin;
 }
 
 /* Add a top margin to the content corresponding to the height of the header. */
 body::before {
 	display: block;
+	width: 100%;
+	height: 11%; /* Should correspond to header's height. */
+	margin-bottom: 6.5%;
+
 	content: '\0000a0'; /* Non-breaking space (&nbsp;) */
 	font-size: 180%; /* Same as the header's font size. */
-	line-height: 200%; /* Slighly more than the header's line-height. */
-	height: 10%;
+	line-height: 200%; /* Slighly more than the header's line-height. */;
 }
 
 /* Add a bottom margin. */
@@ -48,12 +51,14 @@ header {
 
 	position: fixed;
 	top: 0;
+	left: 0;
+	right: 0;
 
 	width: 100%;
-	height: 10%;
+	height: 11%;
 	
 	/* Left and right margins should correspond to body margins. */
-	margin: 0 -5% 8px -5%;
+	margin: 0 0 3.45% 0;
 	/* Left padding should correspond to the back button's width. */
 	padding: 1% 2% 1% 2%;
 
@@ -67,9 +72,19 @@ header {
 	z-index: 1000;
 }
 header button {
-	height: 80%;
+	display: block;
+	position: absolute;
+	top: 50%;
+	right: 0;
+	height: 70%;
 
-	font-size: 60%;
+	margin: 0;
+
+	font-size: 50%;
+
+	-webkit-transform: translateY(-50%);
+	-ms-transform: translateY(-50%);
+	transform: translateY(-50%);
 }
 header button.back {
 	position: absolute;
@@ -110,6 +125,18 @@ header button.menu {
 	border: none;
 
 	box-shadow: none;
+}
+header img.logotype {
+	position: absolute;
+	top: 50%;
+	left: 0;
+	right: 0;
+
+	margin: 0 auto;
+
+	-webkit-transform: translateY(-50%);
+	-ms-transform: translateY(-50%);
+	transform: translateY(-50%);
 }
 
 header h1 {
@@ -157,7 +184,7 @@ input[type="text"],input[type="url"] {
 	padding: 7px 14px 7px 14px;
 
 	font-family: inherit;
-	font-size: 100%;
+	font-size: 63%;
 	color: #000;
 
 	border-radius: 4px;
@@ -175,13 +202,13 @@ button {
 	box-sizing: border-box; /* Width & height includes padding & border. */
 
 	font-family: 'Proxima Nova Black';
-	font-size: 100%;
+	font-size: 63%;
 	line-height: 100%;
 	text-align: center;
 
 	color: #fff;
 
-	margin: 0;
+	margin: 2% 0 2% 0;
 	padding: 9px 13px 8px 13px;
 
 	border-radius: 4px;
@@ -203,19 +230,26 @@ canvas {
 }
 
 h1 {
+	padding: 0;
+	margin: 3.45% 0 3.45% 0;
+
 	font-family: 'Proxima Nova Black';
+	font-size: 100%;
 }
 
 h2,h3,h4,h5,h6 {
+	margin: 2% 0 2% 0;
+	padding: 0;
+
 	font-family: 'Proxima Nova Bold';
+	font-size: 63%;
 }
 
-h2 { font-size: 110%; }
-
-h3 { font-size: 100%; }
-
 p {
-	font-size: 100%;
+	margin: 2% 0 2% 0;
+	padding: 0;
+
+	font-size: 0.63em;
 }
 
 strong {

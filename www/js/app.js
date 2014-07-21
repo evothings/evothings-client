@@ -369,21 +369,22 @@ app.showArticle = function(event)
 {
 	var articlePage = $('article#' + event.data.articleId)
 
-	$(this).toggleClass('pressed')
+	//$(this).toggleClass('pressed')
 	$('main').toggle()
 	articlePage.toggle()
 
-	/*if (articlePage.is(":visible"))
-		$('header button.back').show()
+	if (articlePage.is(":visible"))
+		$(this).text('Back')
 	else
-		$('header button.back').hide()*/
+		$(this).text('Info')
 }
 
 app.showMain = function()
 {
 	$('main').show()
 	$('article').hide()
-	$('#info_button').removeClass('pressed')
+	//$('#info_button').removeClass('pressed')
+	$('#info_button').text('Info')
 	$('header button.back').hide()
 }
 

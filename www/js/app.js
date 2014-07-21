@@ -307,8 +307,8 @@ app.displayServers = function()
 		{
 			var server = servers[key]
 			list +=
-				'<li><a onclick="app.connectTo(\'' +
-				server.url + '\')">' +
+				'<li onclick="app.connectTo(\'' +
+				server.url + '\')"><a>' +
 				'<strong>Touch here to connect to:</strong><br/>' +
 				server.name + '<br/>' +
 				'<small>' + server.ipAndPort + '</small><br/>' +
@@ -317,7 +317,6 @@ app.displayServers = function()
 	}
 
 	$('#hyper-server-list').html(list)
-	$('#hyper-server-list').listview('refresh')
 }
 
 app.setConnectButtonStateToConnecting = function()

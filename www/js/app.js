@@ -369,7 +369,6 @@ app.showArticle = function(event)
 {
 	var articlePage = $('article#' + event.data.articleId)
 
-	//$(this).toggleClass('pressed')
 	$('main').toggle()
 	articlePage.toggle()
 
@@ -383,7 +382,6 @@ app.showMain = function()
 {
 	$('main').show()
 	$('article').hide()
-	//$('#info_button').removeClass('pressed')
 	$('#info_button').text('Info')
 	$('header button.back').hide()
 }

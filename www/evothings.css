@@ -231,14 +231,20 @@ canvas {
 
 h1 {
 	padding: 0;
-	margin: 3.45% 0 3.45% 0;
+	margin: 0;
 
 	font-family: 'Proxima Nova Black';
 	font-size: 100%;
+	line-height: 1.5;
+
+	vertical-align: middle;
+}
+main h1:first-child, article h1:first-child {
+	margin-top: 0;
 }
 
 h2,h3,h4,h5,h6 {
-	margin: 2% 0 2% 0;
+	margin: 0 0 0 0;
 	padding: 0;
 
 	font-family: 'Proxima Nova Bold';
@@ -246,7 +252,7 @@ h2,h3,h4,h5,h6 {
 }
 
 p {
-	margin: 2% 0 2% 0;
+	margin: 10px 0 10px 0;
 	padding: 0;
 
 	font-size: 0.63em;

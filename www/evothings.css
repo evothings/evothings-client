@@ -75,7 +75,6 @@ header button {
 	display: block;
 	position: absolute;
 	top: 50%;
-	right: 0;
 	height: 70%;
 
 	margin: 0;
@@ -88,7 +87,7 @@ header button {
 }
 header button.back {
 	position: absolute;
-	left: 0;
+	left: 6.25%;
 
 	width: 10%;
 	height: 100%;
@@ -98,6 +97,8 @@ header button.back {
 	/* Font size is percentage of the header's font size. */
 	font-size: 50%;
 	color: #000;
+
+	text-align: left;
 
 	background: none;
 
@@ -108,7 +109,7 @@ header button.back {
 }
 header button.menu {
 	position: absolute;
-	right: 5%;
+	right: 6.25%;
 
 	width: 10%;
 	height: 100%;
@@ -118,6 +119,8 @@ header button.menu {
 	/* Font size is percentage of the header's font size. */
 	font-size: 50%;
 	color: #000;
+
+	text-align: right;
 
 	background: none;
 
@@ -257,7 +260,7 @@ p {
 	margin: 10px 0 10px 0;
 	padding: 0;
 
-	font-size: 0.63em;
+	font-size: 63%;
 	line-height: 1.5;
 }
 

@@ -1,14 +1,14 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.evothings.evothingsclient"
-	version="0.7.4"
-	android-versionCode="4"
+	version="0.8.0"
+	android-versionCode="5"
 	xmlns="http://www.w3.org/ns/widgets"
 	xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Evothings</name>
     <description>
         Mobile app for Evothings Studio.
     </description>
-    <author email="alex@evothings.com" href="http://evothings.com">
+    <author email="info@evothings.com" href="http://evothings.com">
         Evothings AB
     </author>
     <content src="index.html" />
@@ -22,4 +22,5 @@
 	<preference name="FadeSplashScreen" value="false" />
 	<preference name="EnableViewportScale" value="true" />
 	<preference name="AndroidLaunchMode" value="singleTask" />
+	<preference name="BackupWebStorage" value="local" />
 </widget>

@@ -49,9 +49,14 @@ require lc if(File.exists?(lc))
 def testCordovaVersion
 	installedVersion = open("|cordova -v").read.strip
 	if(installedVersion < @requiredCordovaVersion)
+		puts
 		puts "Fatal error:"
-		puts "Your installed cordova version is #{installedVersion}"
-		puts "Evothings Client requires at least #{@requiredCordovaVersion}"
+		if(installedVersion.length < 1)
+			puts "Cordova is not properly installed."
+		else
+			puts "Your installed Cordova version is #{installedVersion}"
+		end
+		puts "Evothings Client requires Cordova #{@requiredCordovaVersion} or later"
 		puts
 		raise "CordovaVersionError"
 	end

@@ -318,6 +318,14 @@ def copyIconsAndPlatformFiles
 	end
 end
 
+def copyStylesheet
+	if(File.exist?("../EvoThingsExamples/resources"))
+		FileUtils.copy_entry("../EvoThingsExamples/resources", "www/ui")
+	else
+		raise "Couldn't find ../EvoThingsExamples/resources."
+	end
+end
+
 def build
 	# Check that the Cordova version installed is
 	# compatible with build script.
@@ -354,6 +362,9 @@ def build
 
 	# Copy icon files and native project files.
 	copyIconsAndPlatformFiles
+
+	# Copy stylesheet and its associated files from EvoThingsExamples
+	copyStylesheet
 
 	# Add all plugins.
 	addPlugins

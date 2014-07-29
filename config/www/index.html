@@ -3,7 +3,9 @@
 <head>
 
 	<meta charset="utf-8" />
-	<meta name="format-detection" content="telephone=no" />
+	<meta name="viewport" content="target-densitydpi=device-dpi,
+		width=device-width, initial-scale=1.0, minimum-scale=1.0,
+		maximum-scale=1.0, user-scalable=no" />
 
 	<script src="js/hyper-os.js"></script>
 	<script src="js/hyper-viewport.js"></script>
@@ -11,7 +13,7 @@
 	<title>Evothings Client</title>
 	
 	<style>
-		@import 'evothings-app.css';
+		@import 'ui/evothings-app.css';
 
 		#info_button {
 			position: absolute;
@@ -24,12 +26,10 @@
 
 </head>
 
-<!-- ontouchstart="" enables low-delay CSS transitions. -->
-<body ontouchstart="">
+<body ontouchstart=""><!-- ontouchstart="" enables low-delay CSS transitions. -->
 
 	<header>
-		<img class="logotype" src="gfx/logo.svg" height="60%" alt="Evothings"
-			title="Evothings" />
+		<img class="logotype" src="ui/gfx/logo.svg" alt="Evothings" />
 
 		<button id="info_button" class="charcoal">Info</button>
 	</header>

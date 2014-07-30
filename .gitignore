@@ -3,3 +3,4 @@ platforms
 plugins
 /localConfig.rb
 /www/index.html
+/www/ui

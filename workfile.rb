@@ -259,7 +259,7 @@ def copyIconsAndPlatformFiles
 		destPath = "platforms/ios/EvoThings/Resources/icons/"
 
 		# Delete old icons.
-		FileUtils.rm_rf(Dir.glob(destPath + "*"))
+		rm_rf(Dir.glob(destPath + "*"))
 
 		copyIOSIcon = lambda do |src, dest|
 			cp(srcPath + src, destPath + dest)
@@ -285,7 +285,7 @@ def copyIconsAndPlatformFiles
 	if(@platform == "ios")
 		srcPath = "config/icons/ios_splash"
 		destPath = "platforms/ios/EvoThings/Resources/splash"
-		FileUtils.copy_entry(srcPath, destPath)
+		copy_entry(srcPath, destPath)
 	end
 
 	# Copy native Android source files.
@@ -325,7 +325,7 @@ end
 
 def copyStylesheet
 	if(File.exist?("../EvoThingsExamples/resources"))
-		FileUtils.copy_entry("../EvoThingsExamples/resources", "www/ui")
+		copy_entry("../EvoThingsExamples/resources", "www/ui")
 	else
 		raise "Couldn't find ../EvoThingsExamples/resources."
 	end
@@ -351,7 +351,7 @@ def build
 		# installed platforms and remove them.
 		sh "cordova -d platform remove ios"
 		sh "cordova -d platform remove android"
-		FileUtils.rm_rf(Dir.glob("plugins/*"))
+		rm_rf(Dir.glob("plugins/*"))
 	end
 
 	# Create www/index.html with current version info.

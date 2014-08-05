@@ -21,19 +21,29 @@
         android:label="@string/app_name">
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label="@string/app_name" android:name="Evothings"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:name="Evothings"
             android:theme="@android:style/Theme.Black.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <data android:scheme="evothings"/>
+                <data android:scheme="evothings" />
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </activity>
+        <service android:enabled="true" android:exported="true" android:isolatedProcess="false" android:label="iBeacon" android:name="com.radiusnetworks.ibeacon.service.IBeaconService" />
+        <service android:enabled="true" android:name="com.radiusnetworks.ibeacon.IBeaconIntentProcessor">
+            <meta-data android:name="background" android:value="true" />
+            <intent-filter android:priority="1">
+                <action android:name="org.apache.cordova.ibeacon.IBeaconPlugin.DID_RANGING" />
+                <action android:name="org.apache.cordova.ibeacon.IBeaconPlugin.DID_MONITORING" />
+            </intent-filter>
+        </service>
     </application>
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="19" />
     <uses-permission android:name="android.permission.BLUETOOTH" />

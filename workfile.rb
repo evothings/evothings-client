@@ -331,6 +331,13 @@ def copyStylesheet
 	end
 end
 
+def removeUnusedImages
+	if(@platform == "android")
+		files = Dir['platforms/android/res/**/screen.png']
+		rm(files)
+	end
+end
+
 def build
 	# Check that the Cordova version installed is
 	# compatible with build script.
@@ -373,6 +380,9 @@ def build
 
 	# Add all plugins.
 	addPlugins
+
+	# Remove unused Images
+	removeUnusedImages
 
 	# Recreate www/index.html with plugin version info.
 	createIndexFileWithVersionInfo

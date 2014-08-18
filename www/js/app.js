@@ -373,7 +373,7 @@ app.showArticle = function(event)
 	articlePage.toggle()
 
 	if (articlePage.is(":visible"))
-		$(this).text('Back')
+		$(this).text('Main view')
 	else
 		$(this).text('Info')
 }

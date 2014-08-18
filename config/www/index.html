@@ -13,11 +13,6 @@
 
 	<style>
 		@import 'ui/evothings-app.css';
-
-		#info_button {
-			position: absolute;
-			right: 2%;
-		}
 	</style>
 
 	<script src="libs/jquery/jquery.js"></script>
@@ -30,7 +25,15 @@
 	<header>
 		<img class="logotype" src="ui/gfx/logo.svg" alt="Evothings" />
 
-		<button id="info_button" class="charcoal">Info</button>
+		<!-- tabindex and onclick enables :focus selector in some browsers. -->
+		<button id="menu-button" tabindex="0" onclick="this.focus()">
+			<img src="gfx/menu.svg" />
+		</button>
+
+		<menu>
+			<menuitem id="info_button">Info</menuitem>
+			<menuitem>IoT App Gallery</menuitem>
+		</menu>
 	</header>
 
 	<main>

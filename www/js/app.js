@@ -373,7 +373,7 @@ app.showArticle = function(event)
 	articlePage.toggle()
 
 	if (articlePage.is(":visible"))
-		$(this).text('Main view')
+		$(this).text('Scan for Workbench')
 	else
 		$(this).text('Info')
 }

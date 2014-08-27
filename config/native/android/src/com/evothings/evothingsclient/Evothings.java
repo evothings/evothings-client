@@ -44,47 +44,47 @@ public class Evothings extends CordovaActivity
 
 		// If the intent has a data string we load it.
 		Intent intent = getIntent();
-    	if (isEvothingsIntent(intent))
-    	{
-    		openEvothingsIntent(intent);
-    	}
-    	else
-    	{
-    		// This is the original Cordova page loading code.
-			// Set by <content src="index.html" /> in config.xml
-			super.loadUrl(Config.getStartUrl());
-			//super.loadUrl("file:///android_asset/www/index.html")
-    	}
+		if (isEvothingsIntent(intent))
+		{
+			openEvothingsIntent(intent);
+		}
+		else
+		{
+			// This is the original Cordova page loading code.
+		// Set by <content src="index.html" /> in config.xml
+		super.loadUrl(Config.getStartUrl());
+		//super.loadUrl("file:///android_asset/www/index.html")
+		}
 	}
 
-    @Override
-    protected void onNewIntent(Intent intent)
-    {
-    	if (isEvothingsIntent(intent))
-    	{
-    		openEvothingsIntent(intent);
-    	}
-		else
+	@Override
+	protected void onNewIntent(Intent intent)
+	{
+		if (isEvothingsIntent(intent))
 		{
-        	super.onNewIntent(intent);
-        }
-    }
+			openEvothingsIntent(intent);
+		}
+	else
+	{
+				super.onNewIntent(intent);
+			}
+	}
 
-    protected boolean isEvothingsIntent(Intent intent)
-    {
-    	String url = intent.getDataString();
-    	if (null != url)
-    	{
-    		return url.startsWith("evothings");
-    	}
-		else
+	protected boolean isEvothingsIntent(Intent intent)
+	{
+		String url = intent.getDataString();
+		if (null != url)
 		{
-        	return false;
-        }
-    }
+			return url.startsWith("evothings:");
+		}
+	else
+	{
+				return false;
+			}
+	}
 
-    protected void openEvothingsIntent(Intent intent)
-    {
+	protected void openEvothingsIntent(Intent intent)
+	{
 		// Get the URL string of the intent.
 		String url = intent.getDataString();
 
@@ -93,7 +93,7 @@ public class Evothings extends CordovaActivity
 
 		// Load the URL in the Cordova web view.
 		this.appView.loadUrlIntoView(url);
-    }
+	}
 
 	// For Cordova 3.1+
 	@Override
@@ -114,6 +114,7 @@ public class Evothings extends CordovaActivity
 			super(cordova, view);
 		}
 
+		@Override
 		public WebResourceResponse shouldInterceptRequest(WebView view, String url)
 		{
 			String localURL = getCordovaLocalFileURL(url);
@@ -121,9 +122,25 @@ public class Evothings extends CordovaActivity
 			{
 				return handleCordovaURL(view, localURL, url);
 			}
-			else
+			else if(url.startsWith("evothings:"))
 			{
-				return super.shouldInterceptRequest(view, url);
+				LOG.e("EvothingsWebViewClient", "shouldInterceptRequest on "+url);
+				url = "http" + url.substring(9);
+			}
+
+			return super.shouldInterceptRequest(view, url);
+		}
+
+		@Override
+		public boolean shouldOverrideUrlLoading(WebView view, String url) {
+			if(url.startsWith("evothings:")) {
+				LOG.e("EvothingsWebViewClient", "shouldOverrideUrlLoading true on "+url);
+				url = "http" + url.substring(9);
+				appView.loadUrlIntoView(url);
+				return true;	// we handled it.
+			} else {
+				LOG.e("EvothingsWebViewClient", "shouldOverrideUrlLoading false on "+url);
+				return false;	// system handles it.
 			}
 		}
 

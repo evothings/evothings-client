@@ -325,7 +325,7 @@ end
 
 def copyStylesheet
 	if(File.exist?("../EvoThingsExamples/resources"))
-		copy_entry("../EvoThingsExamples/resources", "www/ui")
+		cp_r(Dir["../EvoThingsExamples/resources/*"], "www/")
 	else
 		raise "Couldn't find ../EvoThingsExamples/resources."
 	end

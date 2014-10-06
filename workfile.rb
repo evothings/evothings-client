@@ -132,7 +132,12 @@ def addPlugins
 
 	# Classic Bluetooth for Android.
 	if (@platform == "android")
-		addPlugin("com.megster.cordova.bluetoothserial", "https://github.com/don/BluetoothSerial.git")
+		if(defined?(CONFIG_BLUETOOTH_SERIAL_DIR))
+			location = CONFIG_BLUETOOTH_SERIAL_DIR
+		else
+			location = "https://github.com/don/BluetoothSerial.git"
+		end
+		addPlugin("com.megster.cordova.bluetoothserial", location)
 	end
 
 	# Standard plugins that are not included.

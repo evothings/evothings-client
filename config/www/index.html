@@ -12,7 +12,7 @@
 	<title>Evothings Client</title>
 
 	<style>
-		@import 'ui/evothings-app.css';
+		@import 'evothings-app.css';
 	</style>
 
 	<script src="libs/jquery/jquery.js"></script>
@@ -23,16 +23,18 @@
 <body ontouchstart=""><!-- ontouchstart="" enables low-delay CSS transitions. -->
 
 	<header>
-		<img class="logotype" src="ui/gfx/logo.svg" alt="Evothings" />
+		<img class="logotype" src="gfx/logo.svg" alt="Evothings" />
 
 		<!-- tabindex and onclick enables :focus selector in some browsers. -->
 		<button id="menu-button" tabindex="0" onclick="this.focus()">
-			<img src="ui/gfx/menu.svg" />
+			<img src="gfx/menu.svg" />
 		</button>
 
 		<menu>
 			<menuitem id="info_button">Info</menuitem>
-			<menuitem>IoT App Gallery</menuitem>
+			<menuitem onclick="location.href='gallery.html'">
+				App Gallery
+			</menuitem>
 		</menu>
 	</header>
 

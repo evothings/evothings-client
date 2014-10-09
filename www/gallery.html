@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, user-scalable=no,
+		initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+
+	<script src="js/hyper-os.js"></script>
+	<script src="js/hyper-viewport.js"></script>
+
+	<title>Evothings Client</title>
+
+	<style>
+		@import 'evothings-app.css';
+
+		header {
+			height: 10%;
+			margin-bottom: 0;
+		}
+
+		div#iframe_container {
+			position: absolute;
+			top: 12%;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			width: 100%;
+			height: 88%;
+			overflow: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+
+		iframe {
+			width: 100%;
+			height: 100%;
+			border: none;
+		}
+	</style>
+
+	<script src="libs/jquery/jquery.js"></script>
+	<script src="libs/fastclick.js"></script>
+
+</head>
+
+<body ontouchstart=""><!-- ontouchstart="" enables low-delay CSS transitions. -->
+
+	<header>
+		<button class="back" onclick="history.back()">
+			<img src="gfx/arrow_left.svg" />
+		</button>
+
+		<img class="logotype" src="gfx/logo.svg" alt="Evothings" />
+
+		<!-- tabindex and onclick enables :focus selector in some browsers. -->
+		<button id="menu-button" tabindex="0" onclick="this.focus()">
+			<img src="gfx/menu.svg" />
+		</button>
+
+		<menu>
+			<menuitem onclick="location.href='index.html'">
+				Scan for Workbench
+			</menuitem>
+		</menu>
+	</header>
+
+	<div id="iframe_container">
+		<iframe
+			src="http://evothings.com/gallery/gallery.html?etc=1">
+		</iframe>
+	</div>
+
+	<script src="js/app.js"></script>
+
+</body>
+</html>

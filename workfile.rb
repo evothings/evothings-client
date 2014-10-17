@@ -23,7 +23,7 @@ require "./utils.rb"
 
 include FileUtils::Verbose
 
-@requiredCordovaVersion = "3.5.0"
+@requiredCordovaVersion = "4.0.0"
 
 # TODO: Document how this is used. Not set in this file.
 # Is it optionally set in localConfig.rb ?
@@ -216,7 +216,7 @@ end
 def createIndexFileWithVersionInfo
 	index = fileRead("config/www/index.html")
 	version = readVersionNumber()
-	gitInfo = readGitInfo("EvoThingsClient", ".")
+	gitInfo = readGitInfo("evothings-client", ".")
 	@localPlugins.each do |lp|
 		if(lp[:location].start_with?("http://") or lp[:location].start_with?("https://"))
 			cmd = "git ls-remote #{lp[:location]} HEAD"
@@ -329,10 +329,10 @@ def copyIconsAndPlatformFiles
 end
 
 def copyStylesheet
-	if(File.exist?("../EvoThingsExamples/resources"))
-		cp_r(Dir["../EvoThingsExamples/resources/*"], "www/")
+	if(File.exist?("../evothings-examples/resources"))
+		cp_r(Dir["../evothings-examples/resources/*"], "www/")
 	else
-		raise "Couldn't find ../EvoThingsExamples/resources."
+		raise "Couldn't find ../evothings-examples/resources."
 	end
 end
 

@@ -23,7 +23,7 @@ require "./utils.rb"
 
 include FileUtils::Verbose
 
-@requiredCordovaVersion = "4.0.0"
+@requiredCordovaVersion = "3.5.0"
 
 # TODO: Document how this is used. Not set in this file.
 # Is it optionally set in localConfig.rb ?

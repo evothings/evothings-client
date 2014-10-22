@@ -1,6 +1,13 @@
 # Build script for Evothings client app.
 #
-# Possible switches are:
+# Dependencies - The following directory structure is required to build:
+# cordova-ble
+# cordova-plugin-ibeacon
+# evothings-client
+# evothings-examples
+# mobile-chrome-apps
+#
+# Possible build switches are:
 # c - clean target platform before building
 # ca - clean everything before building (removes plugins and target platform)
 # i - install after building
@@ -12,11 +19,29 @@
 # Only one platform may be built per invocation.
 #
 # Examples:
-#   ruby workfile.rb
-#   ruby workfile.rb i
-#   ruby workfile.rb c i
-#   ruby workfile.rb ios
-#   ruby workfile.rb c ios
+# ruby workfile.rb
+# ruby workfile.rb i
+# ruby workfile.rb c i
+# ruby workfile.rb ios
+# ruby workfile.rb c ios
+#
+# An optional config file named localConfig.rb can define
+# build constants and additional plugins.
+#
+# Example of how to specify extra plugins in localConfig.rb:
+# @extraPlugins = [
+#   {:name => 'http', :location => '../cordova-http-digest'},
+#   {:name => 'pl.makingwaves.estimotebeacons', :location => '../phonegap-estimotebeacons'},
+# ]
+#
+# Build constants that can be set in localConfig.rb:
+# CONFIG_DEFAULT_PLATFORM - Platform to build for
+# CONFIG_MOBILE_CHROME_APPS_DIR - Location of Mobile Chrome Apps repository
+# CONFIG_BLUETOOTH_SERIAL_DIR - Location of Bluetooth Classic plugin
+#
+# Example:
+# CONFIG_MOBILE_CHROME_APPS_DIR = '../mobile-chrome-apps/chrome-cordova/plugins'
+#
 
 require "fileutils"
 require "./utils.rb"
@@ -25,8 +50,7 @@ include FileUtils::Verbose
 
 @requiredCordovaVersion = "3.5.0"
 
-# TODO: Document how this is used. Not set in this file.
-# Is it optionally set in localConfig.rb ?
+# Optionally set in localConfig.rb.
 @extraPlugins = []	# array of hashes with these keys: {:name, :location}
 
 # List of plugins installed from the local file system
@@ -101,6 +125,21 @@ def addPlugins
 		end
 	end
 
+	def addMobileChromeAppsPlugin(name, location = name)
+		if(location != name)
+			if(defined?(CONFIG_MOBILE_CHROME_APPS_DIR))
+				# If location and config are specified that is used.
+				addPlugin(name, CONFIG_MOBILE_CHROME_APPS_DIR + "/" + location)
+			else
+				# If only location is specified use default Chrome Apps plugins directory.
+				addPlugin(name, "../mobile-chrome-apps/chrome-cordova/plugins/" + location)
+			end
+		else
+			# Use Cordova package name for network install if location is not specified.
+			addPlugin(name)
+		end
+	end
+
 	@extraPlugins.each do |ep|
 		addPlugin(ep[:name], ep[:location])
 	end
@@ -119,12 +158,14 @@ def addPlugins
 	addPlugin("org.apache.cordova.network-information")
 	addPlugin("org.apache.cordova.vibration")
 
-	# Socket plugin.
-	if(defined?(CONFIG_CHROME_SOCKET_DIR))
-		addPlugin("org.chromium.socket", CONFIG_CHROME_SOCKET_DIR)
-	else
-		addPlugin("org.chromium.socket")
-	end
+	# MobileChromeApps plugins.
+	addMobileChromeAppsPlugin("org.chromium.common", "chrome-common")
+	addMobileChromeAppsPlugin("org.chromium.system.network", "chrome.system.network")
+	addMobileChromeAppsPlugin("org.chromium.iosSocketsCommon", "chrome.iosSocketsCommon")
+	addMobileChromeAppsPlugin("org.chromium.socket", "chrome.socket")
+	addMobileChromeAppsPlugin("org.chromium.sockets.tcp", "chrome.sockets.tcp")
+	addMobileChromeAppsPlugin("org.chromium.sockets.tcpserver", "chrome.sockets.tcpServer")
+	addMobileChromeAppsPlugin("org.chromium.sockets.udp", "chrome.sockets.udp")
 
 	# Plugins on the local file system.
 	addPlugin("com.evothings.ble", "../cordova-ble")
@@ -358,7 +399,7 @@ def build
 
 	# Clean all platforms and plugins if switch "ca" (cleanall) is given.
 	if(@cleanall)
-		# TODO: Rather than hardcoding platforms to remote,
+		# TODO: Rather than hardcoding platforms to remove,
 		# we would use "cordova platform list" to get the
 		# installed platforms and remove them.
 		sh "cordova -d platform remove ios"

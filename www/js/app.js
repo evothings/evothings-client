@@ -1,18 +1,38 @@
 // Application code for the Evothings client.
 
+// Debug logging used when developing the app in Evothings Studio.
+if (window.hyper) { console.log = hyper.log; console.error = hyper.log }
+
+// Constants.
+var BROADCAST_INTERVAL = 2000
+var SERVER_DISCOVERY_TIMEOUT = 6000
+var CONNECT_TIMEOUT = 15000
+
+// Application object.
 var app = {}
+
+// List of found servers.
 app.serverList = {}
+
+// The local UDP socket id.
 app.socketId = -1
+
+// Timer used to periodically broadcast a server scan request.
 app.broadcastTimer = null
+
+// Timer used to check if any servers are found within a
+// certain time limit.
+app.serverDiscoveryCheckTimer = null
 
 app.initialize = function()
 {
-
 	document.addEventListener('deviceready', app.onDeviceReady, false)
 
+	// Page navigation.
 	$('#info_button').bind('click', {articleId: 'info'}, app.showArticle)
 
-	$(function() {
+	$(function()
+	{
 		FastClick.attach(document.body)
 
 		/* Add a clear button to input fields. */
@@ -52,13 +72,6 @@ app.onDeviceReady = function()
 	app.setScanButtonStateToReadyToScan()
 }
 
-// Important to always close socket when page reloads/closes!
-// Note: beforeunload does not work on iOS!
-window.addEventListener('beforeunload', function(e)
-{
-	app.destroySocketAndTimer()
-})
-
 // Set the url field to the saved value.
 app.setSavedIpAddress = function()
 {
@@ -76,36 +89,21 @@ app.connect = function()
 	// Add protocol and port if needed.
 	var url = app.parseIpAddress(ip)
 
-	// Add url to list and connect.
-	if (url)
-	{
-		// Save the URL.
-		localStorage.setItem('hyper-saved-url', url)
+	// Save the URL.
+	localStorage.setItem('hyper-saved-url', url)
 
-		// Open URL.
-		app.connectTo(url)
-	}
-	else
-	{
-		alert('Malformed URL: ' + url)
-	}
+	// Open URL.
+	app.connectTo(url)
 }
 
+// Function called when the SCAN button is pressed.
+// This function has local functions that performs broadcasting
+// and receiving of server scan information.
+// For documentation of chrome.sockets.udp see this page:
+// https://developer.chrome.com/apps/sockets_udp
 app.scan = function()
 {
-
-	if (hyper.isWP())
-	{
-		// Scan is not available in Windows Phone.
-		return
-	}
-
-	if (app.broadcastTimer != null) {
-		app.destroySocketAndTimer()
-		app.setScanButtonStateToNormal()
-		return
-	}
-
+	// Helper function.
 	function stringToBuffer(string)
 	{
 		var buffer = new ArrayBuffer(string.length)
@@ -117,6 +115,7 @@ app.scan = function()
 		return buffer
 	}
 
+	// Helper function.
 	function bufferToString(buffer)
 	{
 		var string = ''
@@ -128,6 +127,7 @@ app.scan = function()
 		return string
 	}
 
+	// Bind UDP socket.
 	function bind()
 	{
 		chrome.sockets.udp.bind(
@@ -136,27 +136,32 @@ app.scan = function()
 			0,
 			function(result)
 			{
-				// result 0 means success
-				if (result == 0)
+				// Result 0 means success, negative is error.
+				if (result <= 0)
 				{
 					// Broadcast UDP packet.
 					send()
 
-					// Timer to do continuous broadcast.
-					app.broadcastTimer = setInterval(function() { send() }, 2000)
+					// Create timer that does continuous broadcast.
+					app.createBroadcastTimer(function() { send() })
+
+					// Create discovery timer.
+					app.createServerDiscoveryCheckTimer()
 
 					// Start receiving data.
 					chrome.sockets.udp.onReceive.addListener(recv)
 				}
 				else
 				{
+					console.log('EvothingsClient: Bind of socket failed')
+					app.destroySocketAndTimers()
 					app.setScanButtonStateToError()
-					// TODO: When bind fails, try to destroy all sockets.
+					app.showMessageCouldNotScan()
 				}
-			}
-		)
+			})
 	}
 
+	// Broadcast scan packet.
 	function send()
 	{
 		chrome.sockets.udp.send(
@@ -164,23 +169,27 @@ app.scan = function()
 			stringToBuffer('hyper.whoIsThere'),
 			'255.255.255.255',
 			4088,
-			function(writeInfo)
+			function(sendInfo)
 			{
-				// writeInfo.bytesWritten 16 means success
-				// (length of 'hyper.whoIsThere').
-				if (writeInfo.bytesWritten != 16)
+				if (sendInfo.resultCode < 0)
 				{
-					// TODO: Error handling?
+					console.log('EvothingsClient: chrome.sockets.udp.send error: ' +
+						sendInfo.resultCode)
+					app.destroySocketAndTimers()
 					app.setScanButtonStateToError()
+					app.showMessageCouldNotScan()
 				}
-			}
-		)
+			})
 	}
 
+	// Handle incoming UPD packet.
 	function recv(recvInfo)
 	{
 		try
 		{
+			// Found a server, destroy discovery timer.
+			app.destroyServerDiscoveryCheckTimer()
+
 			// Add server info to list.
 			var ip = recvInfo.remoteAddress
 			var data = JSON.parse(bufferToString(recvInfo.data))
@@ -191,67 +200,80 @@ app.scan = function()
 		}
 		catch (err)
 		{
-			// TODO: Error handling?
-			console.log('EvothingsClient recv error: ' + err)
+			console.log('EvothingsClient: recv error: ' + err)
+			app.destroySocketAndTimers()
+			app.setScanButtonStateToError()
+			app.showMessageCouldNotScan()
 		}
 	}
 
-	// Clear server list.
-	app.serverList = {}
-
-	// Clean up existing scan if any.
-	app.destroySocketAndTimer()
-
-	// Clear the list of servers.
-	$('#hyper-server-list').html('')
-
-	// Set button state.
-	app.setScanButtonStateToScanning()
-
-	try {
-		// Open UDP connection.
-		chrome.sockets.udp.create({}, function(createInfo)
+	// Main entry point called at the end of the scan function.
+	function startBroadcasting()
+	{
+		// Scan is not available on Windows Phone.
+		if (hyper.isWP())
 		{
-			app.socketId = createInfo.socketId
-			bind()
-		})
-	} catch (err) { 
-		app.setScanButtonStateToNormal()
-		console.error('Failed to create socket: ' + err)
-	}
-}
+			console.log('EvothingsClient: Scan is not available on Windows Phone')
+			return
+		}
 
-app.destroySocketAndTimer = function()
-{
-	if (app.broadcastTimer)
-	{
-		clearInterval(app.broadcastTimer)
-		app.broadcastTimer = null
+		// Kill timers and return if scan is already in progress.
+		if (app.broadcastTimer != null)
+		{
+			app.destroySocketAndTimers()
+			app.setScanButtonStateToNormal()
+			return
+		}
+
+		// Clear server list.
+		app.serverList = {}
+
+		// Clean up existing scan if any.
+		app.destroySocketAndTimers()
+
+		// Clear the list of servers.
+		$('#hyper-server-list').html('')
+
+		// Set button state.
+		app.setScanButtonStateToScanning()
+
+		try
+		{
+			// Open connection, create UDP socket.
+			console.log('@@@ creating UDP socket')
+			chrome.sockets.udp.create({}, function(createInfo)
+			{
+				console.log('@@@ UPD socket created')
+				app.socketId = createInfo.socketId
+				bind()
+			})
+		}
+		catch (err)
+		{
+			console.log('EvothingsClient: Failed to create UDP socket: ' + err)
+			app.destroySocketAndTimers()
+			app.showMessageCouldNotScan()
+			app.setScanButtonStateToNormal()
+		}
 	}
 
-	if (app.socketId > -1)
-	{
-		chrome.sockets.udp.close(app.socketId)
-		app.socketId = -1
-	}
+	// Call function that starts scanning for servers.
+	startBroadcasting()
 }
 
 app.connectTo = function(url)
 {
 	// Clean up.
-	app.destroySocketAndTimer()
+	app.destroySocketAndTimers()
 
-	// If the new page has not loaded within this timeout,
+	// If the new page has not loaded within a certain time,
 	// we consider it an error and display a message.
-	setTimeout(function()
-		{
-			alert('Could not connect to the given address')
-			app.setConnectButtonStateToNormal()
-		},
-		30000)
+	app.createConnectTimer()
 
-	// Set button to 'Connecting' state and open the url.
+	// Set button to 'Connecting' state.
 	app.setConnectButtonStateToConnecting()
+
+	// Open the url.
 	window.location.assign(url)
 }
 
@@ -307,21 +329,115 @@ app.displayServers = function()
 	$('#hyper-server-list').html(list)
 }
 
-app.setConnectButtonStateToConnecting = function()
+app.destroySocketAndTimers = function()
 {
-	$('#hyper-button-connect').html('Connecting')
+	app.destroyBroadcastTimer()
+
+	app.destroyServerDiscoveryCheckTimer()
+
+	if (app.socketId > -1)
+	{
+		chrome.sockets.udp.close(app.socketId)
+		app.socketId = -1
+	}
+}
+
+app.createBroadcastTimer = function(scanFunction)
+{
+	app.destroyBroadcastTimer()
+	app.broadcastTimer = setInterval(scanFunction, BROADCAST_INTERVAL)
+}
+
+app.destroyBroadcastTimer = function()
+{
+	if (app.broadcastTimer)
+	{
+		clearInterval(app.broadcastTimer)
+		app.broadcastTimer = null
+	}
+}
+
+app.createServerDiscoveryCheckTimer = function()
+{
+	app.destroyServerDiscoveryCheckTimer()
+	app.serverDiscoveryCheckTimer = setTimeout(
+		function() { app.showMessageNoServersFound() },
+		SERVER_DISCOVERY_TIMEOUT)
+}
+
+app.destroyServerDiscoveryCheckTimer = function()
+{
+	if (app.serverDiscoveryCheckTimer)
+	{
+		clearTimeout(app.serverDiscoveryCheckTimer)
+		app.serverDiscoveryCheckTimer = null
+	}
+}
+
+app.createConnectTimer = function()
+{
+	// If connection is not made within the timeout
+	// period, an error message is shown.
+	setTimeout(function()
+		{
+			app.destroySocketAndTimers()
+			app.showMessageCouldNotConnect()
+			app.setConnectButtonStateToNormal()
+		},
+		CONNECT_TIMEOUT)
+}
+
+app.showMessageNoServersFound = function()
+{
+	var title = 'No Workbench found'
+	var message = 'Please check that your network allows UDP broadcasting. You can also try connecting by entering the Workbench IP-address and press the CONNECT button.'
+	var button = 'OK'
+	navigator.notification.alert(
+    	message,
+    	function() {}, // callback
+    	title,
+    	button)
+}
+
+app.showMessageCouldNotScan = function()
+{
+	var title = 'Could not start scanning'
+	var message = 'Please check that your network allows UDP broadcasting. You can also try connecting by entering the Workbench IP-address and press the CONNECT button.'
+	var button = 'OK'
+	navigator.notification.alert(
+    	message,
+    	function() {}, // callback
+    	title,
+    	button)
+}
+
+app.showMessageCouldNotConnect = function()
+{
+	var title = 'Could not connect'
+	var message = 'Please check that the device is online and that your network allows connections. If you entered a URL manually check that it has a valid format.'
+	var button = 'OK'
+	navigator.notification.alert(
+    	message,
+    	function() {}, // callback
+    	title,
+    	button)
 }
 
 app.setConnectButtonStateToNormal = function()
 {
-	$('#hyper-button-connect').html('Connect')
+	$('#hyper-button-connect').html('CONNECT')
+}
+
+app.setConnectButtonStateToConnecting = function()
+{
+	$('#hyper-button-connect').html('CONNECTING...')
 }
 
 app.setScanButtonStateToReadyToScan = function()
 {
 	if (hyper.isWP())
 	{
-		$('#hyper-button-scan').html('Scan not available')
+		$('#hyper-button-scan').html('SCAN NOT AVAILABLE')
 		$('#hyper-button-scan').css('background', 'rgb(128,128,128)')
 		$('#hyper-button-scan').css('border-color', 'rgb(128,128,128)')
 		// This does not seem to work.
@@ -340,7 +456,7 @@ app.setScanButtonStateToNormal = function()
 
 app.setScanButtonStateToScanning = function()
 {
-	$('#hyper-button-scan').html('ABORT SCAN')
+	$('#hyper-button-scan').html('STOP SCAN')
 }
 
 app.setScanButtonStateToError = function()
@@ -374,6 +490,6 @@ app.showMain = function()
 	$('header button.back').hide()
 }
 
-// Main entry point.
+// App main entry point.
 app.initialize()
 

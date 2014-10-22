@@ -184,8 +184,8 @@ app.scan = function()
 			// Add server info to list.
 			var ip = recvInfo.remoteAddress
 			var data = JSON.parse(bufferToString(recvInfo.data))
-			data.url = 'http://' + ip + ':' + recvInfo.remotePort
-			data.ipAndPort = ip + ':' + recvInfo.remotePort
+			data.url = 'http://' + ip + ':' + data.port
+			data.ipAndPort = ip + ':' + data.port
 			app.serverList[ip] = data
 			app.displayServers()
 		}

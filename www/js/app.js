@@ -130,7 +130,7 @@ app.scan = function()
 
 	function bind()
 	{
-		chrome.socket.bind(
+		chrome.sockets.udp.bind(
 			app.socketId,
 			null,
 			0,
@@ -146,7 +146,7 @@ app.scan = function()
 					app.broadcastTimer = setInterval(function() { send() }, 2000)
 
 					// Start receiving data.
-					recv()
+					chrome.sockets.udp.onReceive.addListener(recv)
 				}
 				else
 				{
@@ -159,7 +159,7 @@ app.scan = function()
 
 	function send()
 	{
-		chrome.socket.sendTo(
+		chrome.sockets.udp.send(
 			app.socketId,
 			stringToBuffer('hyper.whoIsThere'),
 			'255.255.255.255',
@@ -177,35 +177,23 @@ app.scan = function()
 		)
 	}
 
-	function recv()
+	function recv(recvInfo)
 	{
-		chrome.socket.recvFrom(
-			app.socketId,
-			function(recvInfo)
-			{
-				if (recvInfo.resultCode > 0)
-				{
-					try
-					{
-						// Add server info to list.
-						var ip = recvInfo.address
-						var data = JSON.parse(bufferToString(recvInfo.data))
-						data.url = 'http://' + ip + ':' + data.port
-						data.ipAndPort = ip + ':' + data.port
-						app.serverList[ip] = data
-						app.displayServers()
-
-						// Call recv again to get more data.
-						recv()
-					}
-					catch (err)
-					{
-						// TODO: Error handling?
-						console.log('EvothingsClient recv error: ' + err)
-					}
-				}
-			}
-		)
+		try
+		{
+			// Add server info to list.
+			var ip = recvInfo.remoteAddress
+			var data = JSON.parse(bufferToString(recvInfo.data))
+			data.url = 'http://' + ip + ':' + recvInfo.remotePort
+			data.ipAndPort = ip + ':' + recvInfo.remotePort
+			app.serverList[ip] = data
+			app.displayServers()
+		}
+		catch (err)
+		{
+			// TODO: Error handling?
+			console.log('EvothingsClient recv error: ' + err)
+		}
 	}
 
 	// Clear server list.
@@ -222,7 +210,7 @@ app.scan = function()
 
 	try {
 		// Open UDP connection.
-		chrome.socket.create('udp', {}, function(createInfo)
+		chrome.sockets.udp.create({}, function(createInfo)
 		{
 			app.socketId = createInfo.socketId
 			bind()
@@ -243,7 +231,7 @@ app.destroySocketAndTimer = function()
 
 	if (app.socketId > -1)
 	{
-		chrome.socket.destroy(app.socketId)
+		chrome.sockets.udp.close(app.socketId)
 		app.socketId = -1
 	}
 }

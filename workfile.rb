@@ -164,7 +164,7 @@ def addPlugins
 	addMobileChromeAppsPlugin("org.chromium.iosSocketsCommon", "chrome.iosSocketsCommon")
 	addMobileChromeAppsPlugin("org.chromium.socket", "chrome.socket")
 	addMobileChromeAppsPlugin("org.chromium.sockets.tcp", "chrome.sockets.tcp")
-	addMobileChromeAppsPlugin("org.chromium.sockets.tcpserver", "chrome.sockets.tcpServer")
+	#addMobileChromeAppsPlugin("org.chromium.sockets.tcpserver", "chrome.sockets.tcpServer")	# requires cordova 4.0 on Android.
 	addMobileChromeAppsPlugin("org.chromium.sockets.udp", "chrome.sockets.udp")
 
 	# Plugins on the local file system.

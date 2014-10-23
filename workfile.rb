@@ -399,12 +399,8 @@ def build
 
 	# Clean all platforms and plugins if switch "ca" (cleanall) is given.
 	if(@cleanall)
-		# TODO: Rather than hardcoding platforms to remove,
-		# we would use "cordova platform list" to get the
-		# installed platforms and remove them.
-		sh "cordova -d platform remove ios"
-		sh "cordova -d platform remove android"
-		rm_rf(Dir.glob("plugins/*"))
+		rm_rf("platforms")
+		rm_rf("plugins")
 	end
 
 	# Create www/index.html with current version info.

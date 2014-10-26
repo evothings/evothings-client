@@ -240,10 +240,8 @@ app.scan = function()
 		try
 		{
 			// Open connection, create UDP socket.
-			console.log('@@@ creating UDP socket')
 			chrome.sockets.udp.create({}, function(createInfo)
 			{
-				console.log('@@@ UPD socket created')
 				app.socketId = createInfo.socketId
 				bind()
 			})

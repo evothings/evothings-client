@@ -3,7 +3,6 @@
     android:hardwareAccelerated="true"
     android:versionCode="EVOTHINGS_CLIENT_ANDROID_VERSION_CODE"
     android:versionName="EVOTHINGS_CLIENT_VERSION_NUMBER"
-    android:windowSoftInputMode="adjustPan"
     package="com.evothings.evothingsclient"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <supports-screens
@@ -21,11 +20,12 @@
         android:label="@string/app_name">
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label="@string/app_name"
+            android:label="@string/activity_name"
             android:launchMode="singleTask"
             android:name="Evothings"
-            android:theme="@android:style/Theme.Black.NoTitleBar">
-            <intent-filter>
+            android:theme="@android:style/Theme.Black.NoTitleBar"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter android:label="@string/launcher_name">
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
@@ -36,12 +36,13 @@
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </activity>
+        <service android:exported="false" android:name="com.estimote.sdk.service.BeaconService" />
         <service android:enabled="true" android:exported="true" android:isolatedProcess="false" android:label="iBeacon" android:name="com.radiusnetworks.ibeacon.service.IBeaconService" />
         <service android:enabled="true" android:name="com.radiusnetworks.ibeacon.IBeaconIntentProcessor">
             <meta-data android:name="background" android:value="true" />
             <intent-filter android:priority="1">
-                <action android:name="org.apache.cordova.ibeacon.IBeaconPlugin.DID_RANGING" />
-                <action android:name="org.apache.cordova.ibeacon.IBeaconPlugin.DID_MONITORING" />
+                <action android:name="com.unarin.cordova.beacon.IBeaconPlugin.DID_RANGING" />
+                <action android:name="com.unarin.cordova.beacon.IBeaconPlugin.DID_MONITORING" />
             </intent-filter>
         </service>
     </application>

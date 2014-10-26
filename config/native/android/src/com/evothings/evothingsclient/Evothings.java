@@ -51,9 +51,9 @@ public class Evothings extends CordovaActivity
 		else
 		{
 			// This is the original Cordova page loading code.
-		// Set by <content src="index.html" /> in config.xml
-		super.loadUrl(Config.getStartUrl());
-		//super.loadUrl("file:///android_asset/www/index.html")
+			// Set by <content src="index.html" /> in config.xml
+			super.loadUrl(Config.getStartUrl());
+			//super.loadUrl("file:///android_asset/www/index.html")
 		}
 	}
 
@@ -64,10 +64,10 @@ public class Evothings extends CordovaActivity
 		{
 			openEvothingsIntent(intent);
 		}
-	else
-	{
-				super.onNewIntent(intent);
-			}
+		else
+		{
+			super.onNewIntent(intent);
+		}
 	}
 
 	protected boolean isEvothingsIntent(Intent intent)
@@ -77,10 +77,10 @@ public class Evothings extends CordovaActivity
 		{
 			return url.startsWith("evothings:");
 		}
-	else
-	{
-				return false;
-			}
+		else
+		{
+			return false;
+		}
 	}
 
 	protected void openEvothingsIntent(Intent intent)
@@ -122,7 +122,7 @@ public class Evothings extends CordovaActivity
 			{
 				return handleCordovaURL(view, localURL, url);
 			}
-			else if(url.startsWith("evothings:"))
+			else if (url.startsWith("evothings:"))
 			{
 				LOG.e("EvothingsWebViewClient", "shouldInterceptRequest on "+url);
 				url = "http" + url.substring(9);
@@ -132,13 +132,17 @@ public class Evothings extends CordovaActivity
 		}
 
 		@Override
-		public boolean shouldOverrideUrlLoading(WebView view, String url) {
-			if(url.startsWith("evothings:")) {
+		public boolean shouldOverrideUrlLoading(WebView view, String url)
+		{
+			if (url.startsWith("evothings:"))
+			{
 				LOG.e("EvothingsWebViewClient", "shouldOverrideUrlLoading true on "+url);
 				url = "http" + url.substring(9);
 				appView.loadUrlIntoView(url);
 				return true;	// we handled it.
-			} else {
+			}
+			else
+			{
 				LOG.e("EvothingsWebViewClient", "shouldOverrideUrlLoading false on "+url);
 				return false;	// system handles it.
 			}

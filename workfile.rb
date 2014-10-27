@@ -45,11 +45,12 @@
 #
 
 require "fileutils"
+require 'rexml/document'
 require "./utils.rb"
 
 include FileUtils::Verbose
 
-@requiredCordovaVersion = "3.6.0"
+@requiredCordovaVersion = "3.6.3"
 
 # Optionally set in localConfig.rb.
 @extraPlugins = []	# array of hashes with these keys: {:name, :location}
@@ -276,6 +277,41 @@ def createIndexFileWithVersionInfo
 	fileSave("www/index.html", index)
 end
 
+# "platforms/android/AndroidManifest.xml"
+def modifyManifest
+	return if(@platform != "android")
+
+	filename = "platforms/android/AndroidManifest.xml"
+	puts "Modifying #{filename}..."
+	doc = REXML::Document.new(fileRead(filename))
+	doc.elements.each('manifest/application/activity') do |el|
+		hasEvothingsFilter = false
+		el.elements.each("intent-filter/data[@android:scheme='evothings']") do |e|
+			hasEvothingsFilter = true
+			puts "evothings filter already present."
+		end
+		break if(hasEvothingsFilter)
+
+		intentFilter = REXML::Element.new('intent-filter')
+		intentFilter.add_element('data', {'android:scheme' => 'evothings'})
+		intentFilter.add_element('action', {'android:name' => 'android.intent.action.VIEW'})
+		intentFilter.add_element('category', {'android:name' => 'android.intent.category.DEFAULT'})
+		intentFilter.add_element('category', {'android:name' => 'android.intent.category.BROWSABLE'})
+		el.add_element(intentFilter)
+	end
+	doc.elements.each('manifest/uses-sdk') do |el|
+		ourMinSdkVersion = 14
+		if(el.attributes['android:minSdkVersion'].to_i > ourMinSdkVersion)
+			raise "Error: android:minSdkVersion > #{ourMinSdkVersion}"
+		end
+		el.attributes['android:minSdkVersion'] = ourMinSdkVersion
+	end
+	file = open(filename, "w")
+	doc.write(file, 4)
+	file.close
+	puts "Wrote #{filename}."
+end
+
 def copyIconsAndPlatformFiles
 	# Copy Android icon files to native project.
 	if(@platform == "android")
@@ -340,15 +376,6 @@ def copyIconsAndPlatformFiles
 		# Copy customised Activity class.
 		cp("config/native/android/src/com/evothings/evothingsclient/Evothings.java",
 			"platforms/android/src/com/evothings/evothingsclient/Evothings.java")
-
-		# Insert version info into manifest file.
-		fileSave(
-			"platforms/android/AndroidManifest.xml",
-			fileRead("config/native/android/AndroidManifest.xml").gsub(
-				"EVOTHINGS_CLIENT_VERSION_NUMBER",
-				readVersionNumber()).gsub(
-					"EVOTHINGS_CLIENT_ANDROID_VERSION_CODE",
-					readAndroidVersionCode()))
 	end
 
 	# Copy native iOS source files.
@@ -429,6 +456,9 @@ def build
 
 	# Recreate www/index.html with plugin version info.
 	createIndexFileWithVersionInfo
+
+	# Modify manifest file(s).
+	modifyManifest
 
 	# Build platform.
 	sh "cordova build #{@platform}"

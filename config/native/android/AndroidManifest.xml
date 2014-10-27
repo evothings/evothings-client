@@ -36,7 +36,6 @@
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </activity>
-        <service android:exported="false" android:name="com.estimote.sdk.service.BeaconService" />
         <service android:enabled="true" android:exported="true" android:isolatedProcess="false" android:label="iBeacon" android:name="com.radiusnetworks.ibeacon.service.IBeaconService" />
         <service android:enabled="true" android:name="com.radiusnetworks.ibeacon.IBeaconIntentProcessor">
             <meta-data android:name="background" android:value="true" />

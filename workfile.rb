@@ -6,6 +6,7 @@
 # evothings-client
 # evothings-examples
 # mobile-chrome-apps
+# BluetoothSerial
 #
 # Possible build switches are:
 # c - clean target platform before building
@@ -48,7 +49,7 @@ require "./utils.rb"
 
 include FileUtils::Verbose
 
-@requiredCordovaVersion = "3.5.0"
+@requiredCordovaVersion = "3.6.0"
 
 # Optionally set in localConfig.rb.
 @extraPlugins = []	# array of hashes with these keys: {:name, :location}
@@ -190,7 +191,7 @@ def addPlugins
 	#addPlugin("org.apache.cordova.splashscreen")
 
 	# SMS plugin is not included.
-	#addPlugin("com.evothings.ble", "../phonegap-sms-plugin")
+	#addPlugin("org.apache.cordova.plugin.sms", "../phonegap-sms-plugin")
 end
 
 def fileRead(filePath)

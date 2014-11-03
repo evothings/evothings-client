@@ -397,9 +397,10 @@ def copyIconsAndPlatformFiles
 	end
 end
 
-def copyStylesheet
+def copyStylesheetAndJQuery
 	if(File.exist?("../evothings-examples/resources"))
-		cp_r(Dir["../evothings-examples/resources/*"], "www/")
+		cp_r(Dir["../evothings-examples/resources/ui"], "www/")
+		cp_r(Dir["../evothings-examples/resources/libs/jquery"], "www/libs/")
 	else
 		raise "Couldn't find ../evothings-examples/resources."
 	end
@@ -445,8 +446,8 @@ def build
 	# Copy icon files and native project files.
 	copyIconsAndPlatformFiles
 
-	# Copy stylesheet and its associated files from EvoThingsExamples
-	copyStylesheet
+	# Copy stylesheet and associated files from evothings-examples.
+	copyStylesheetAndJQuery
 
 	# Add all plugins.
 	addPlugins

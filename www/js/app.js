@@ -1,7 +1,7 @@
 // Application code for the Evothings client.
 
 // Debug logging used when developing the app in Evothings Studio.
-if (window.hyper) { console.log = hyper.log; console.error = hyper.log }
+if (window.hyper && window.hyper.log) { console.log = hyper.log; console.error = hyper.log }
 
 // Constants.
 var BROADCAST_INTERVAL = 2000

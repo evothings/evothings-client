@@ -3,6 +3,5 @@ platforms
 plugins
 /localConfig.rb
 /www/index.html
-/www/evothings-app.css
-/www/fonts
-/www/gfx
+/www/ui
+/www/libs/jquery

@@ -124,7 +124,7 @@ public class Evothings extends CordovaActivity
 			}
 			else if (url.startsWith("evothings:"))
 			{
-				LOG.e("EvothingsWebViewClient", "shouldInterceptRequest on "+url);
+				// Replace the 'evothings' protocol with 'http'.
 				url = "http" + url.substring(9);
 			}
 
@@ -136,14 +136,13 @@ public class Evothings extends CordovaActivity
 		{
 			if (url.startsWith("evothings:"))
 			{
-				LOG.e("EvothingsWebViewClient", "shouldOverrideUrlLoading true on "+url);
+				// Replace the 'evothings' protocol with 'http'.
 				url = "http" + url.substring(9);
 				appView.loadUrlIntoView(url);
 				return true;	// we handled it.
 			}
 			else
 			{
-				LOG.e("EvothingsWebViewClient", "shouldOverrideUrlLoading false on "+url);
 				return false;	// system handles it.
 			}
 		}

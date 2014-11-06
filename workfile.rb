@@ -171,7 +171,7 @@ def addPlugins
 
 	# Plugins on the local file system.
 	addPlugin("com.evothings.ble", "../cordova-ble")
-	addPlugin("org.apache.cordova.ibeacon", "../cordova-plugin-ibeacon")
+	addPlugin("com.unarin.cordova.beacon", "../cordova-plugin-ibeacon")
 
 	# Classic Bluetooth for Android.
 	if (@platform == "android")

@@ -172,6 +172,8 @@ def addPlugins
 	# Plugins on the local file system.
 	addPlugin("com.evothings.ble", "../cordova-ble")
 	addPlugin("com.unarin.cordova.beacon", "../cordova-plugin-ibeacon")
+	addPlugin("pl.makingwaves.estimotebeacons", "../phonegap-estimotebeacons/plugin/")
+	addPlugin("de.appplant.cordova.plugin.local-notification", "../cordova-plugin-local-notifications")
 
 	# Classic Bluetooth for Android.
 	if (@platform == "android")
@@ -401,6 +403,9 @@ def copyStylesheetAndJQuery
 	if(File.exist?("../evothings-examples/resources"))
 		cp_r(Dir["../evothings-examples/resources/ui"], "www/")
 		cp_r(Dir["../evothings-examples/resources/libs/jquery"], "www/libs/")
+		mkdir_p("www/libs/evothings/")
+		cp("../evothings-examples/resources/libs/evothings/evothings.js",
+			"www/libs/evothings/evothings.js")
 	else
 		raise "Couldn't find ../evothings-examples/resources."
 	end

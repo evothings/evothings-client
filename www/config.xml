@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.evothings.evothingsclient"
-	version="1.0.0"
-	android-versionCode="7"
+	version="1.1.0"
+	android-versionCode="8"
 	xmlns="http://www.w3.org/ns/widgets"
 	xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Evothings</name>

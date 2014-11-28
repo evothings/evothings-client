@@ -315,7 +315,7 @@ app.displayServers = function()
 		{
 			var server = servers[key]
 			list +=
-				'<li onclick="app.connectTo(\'' +
+				'<li class="arrow" onclick="app.connectTo(\'' +
 				server.url + '\')"><a>' +
 				'<strong>Touch here to connect to:</strong><br/>' +
 				server.name + '<br/>' +

@@ -7,6 +7,13 @@
 # evothings-examples
 # mobile-chrome-apps
 # BluetoothSerial
+# cordova-plugin-local-notifications
+# phonegap-estimotebeacons
+#
+# All directories that don't exist will be created by the script, except evothings-examples.
+# That one you must clone manually.
+#
+# The workfile is not responsible for keeping the plugins up-to-date; you must do this manually.
 #
 # Possible build switches are:
 # c - clean target platform before building
@@ -114,27 +121,38 @@ def createDirectories
 end
 
 def addPlugins
-	def addPlugin(name, location = name)
-		# Add plugin if not already installed.
-		if(!File.exist?("plugins/#{name}"))
-			sh "cordova -d plugin add #{location}"
-		end
+	def addPlugin(name, location = name, remote = false, branch = false)
 		# If a specific location is given, this is considered to be a
 		# "local" plugin, which will be scanned for git version info.
 		# (location can be a file path or URL).
 		if(location != name)
-			@localPlugins << {:name=>name, :location=>location}
+			if(!remote)
+				raise "Missing remote for plugin #{name}!"
+			end
+			@localPlugins << {:name=>name, :location=>location, :remote=>remote}
+			if(!File.exist?(location))
+				oldDir = pwd
+				cd ".."
+				postfix = " -b #{branch}" if(branch)
+				sh "git clone #{remote}#{postfix}"
+				cd oldDir
+			end
+		end
+		# Add plugin if not already installed.
+		if(!File.exist?("plugins/#{name}"))
+			sh "cordova -d plugin add #{location}"
 		end
 	end
 
 	def addMobileChromeAppsPlugin(name, location = name)
 		if(location != name)
+			mceUrl = 'https://github.com/MobileChromeApps/mobile-chrome-apps'
 			if(defined?(CONFIG_MOBILE_CHROME_APPS_DIR))
 				# If location and config are specified that is used.
-				addPlugin(name, CONFIG_MOBILE_CHROME_APPS_DIR + "/" + location)
+				addPlugin(name, CONFIG_MOBILE_CHROME_APPS_DIR + "/" + location, mceUrl)
 			else
 				# If only location is specified use default Chrome Apps plugins directory.
-				addPlugin(name, "../mobile-chrome-apps/chrome-cordova/plugins/" + location)
+				addPlugin(name, "../mobile-chrome-apps/chrome-cordova/plugins/" + location, mceUrl)
 			end
 		else
 			# Use Cordova package name for network install if location is not specified.
@@ -170,10 +188,17 @@ def addPlugins
 	addMobileChromeAppsPlugin("org.chromium.sockets.udp", "chrome.sockets.udp")
 
 	# Plugins on the local file system.
-	addPlugin("com.evothings.ble", "../cordova-ble")
-	addPlugin("com.unarin.cordova.beacon", "../cordova-plugin-ibeacon")
-	addPlugin("pl.makingwaves.estimotebeacons", "../phonegap-estimotebeacons/plugin/")
-	addPlugin("de.appplant.cordova.plugin.local-notification", "../cordova-plugin-local-notifications")
+	addPlugin("com.evothings.ble", "../cordova-ble",
+		"https://github.com/evothings/cordova-ble")
+
+	addPlugin("com.unarin.cordova.beacon", "../cordova-plugin-ibeacon",
+		"https://github.com/evothings/cordova-plugin-ibeacon", "evothings-1.0.0")
+
+	addPlugin("pl.makingwaves.estimotebeacons", "../phonegap-estimotebeacons/",
+		"https://github.com/evothings/phonegap-estimotebeacons")
+
+	addPlugin("de.appplant.cordova.plugin.local-notification", "../cordova-plugin-local-notifications",
+		"https://github.com/evothings/cordova-plugin-local-notifications", "evothings-master")
 
 	# Classic Bluetooth for Android.
 	if (@platform == "android")
@@ -182,7 +207,7 @@ def addPlugins
 		else
 			location = "../BluetoothSerial"
 		end
-		addPlugin("com.megster.cordova.bluetoothserial", location)
+		addPlugin("com.megster.cordova.bluetoothserial", location, "https://github.com/don/BluetoothSerial")
 	end
 
 	# Standard plugins that are not included.

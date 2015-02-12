@@ -132,6 +132,7 @@ def addPlugins
 			@localPlugins << {:name=>name, :location=>location, :remote=>remote}
 			if(!File.exist?(location))
 				oldDir = pwd
+				mkdir_p File.dirname(location)
 				cd File.dirname(location)
 				postfix = " -b #{branch}" if(branch)
 				sh "git clone #{remote}#{postfix}"
@@ -146,13 +147,13 @@ def addPlugins
 
 	def addMobileChromeAppsPlugin(name, location = name)
 		if(location != name)
-			mceUrl = 'https://github.com/MobileChromeApps/' + location
+			url = 'https://github.com/MobileChromeApps/' + location
 			if(defined?(CONFIG_MOBILE_CHROME_APPS_DIR))
 				# If location and config are specified that is used.
-				addPlugin(name, CONFIG_MOBILE_CHROME_APPS_DIR + "/" + location, mceUrl)
+				addPlugin(name, CONFIG_MOBILE_CHROME_APPS_DIR + "/" + location, url)
 			else
 				# If only location is specified use default Chrome Apps plugins directory.
-				addPlugin(name, "../MobileChromeApps/" + location, mceUrl)
+				addPlugin(name, "../MobileChromeApps/" + location, url)
 			end
 		else
 			# Use Cordova package name for network install if location is not specified.

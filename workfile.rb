@@ -132,7 +132,7 @@ def addPlugins
 			@localPlugins << {:name=>name, :location=>location, :remote=>remote}
 			if(!File.exist?(location))
 				oldDir = pwd
-				cd ".."
+				cd File.dirname(location)
 				postfix = " -b #{branch}" if(branch)
 				sh "git clone #{remote}#{postfix}"
 				cd oldDir
@@ -146,13 +146,13 @@ def addPlugins
 
 	def addMobileChromeAppsPlugin(name, location = name)
 		if(location != name)
-			mceUrl = 'https://github.com/MobileChromeApps/mobile-chrome-apps'
+			mceUrl = 'https://github.com/MobileChromeApps/' + location
 			if(defined?(CONFIG_MOBILE_CHROME_APPS_DIR))
 				# If location and config are specified that is used.
 				addPlugin(name, CONFIG_MOBILE_CHROME_APPS_DIR + "/" + location, mceUrl)
 			else
 				# If only location is specified use default Chrome Apps plugins directory.
-				addPlugin(name, "../mobile-chrome-apps/chrome-cordova/plugins/" + location, mceUrl)
+				addPlugin(name, "../MobileChromeApps/" + location, mceUrl)
 			end
 		else
 			# Use Cordova package name for network install if location is not specified.
@@ -179,13 +179,13 @@ def addPlugins
 	addPlugin("org.apache.cordova.vibration")
 
 	# MobileChromeApps plugins.
-	addMobileChromeAppsPlugin("org.chromium.common", "chrome-common")
-	addMobileChromeAppsPlugin("org.chromium.system.network", "chrome.system.network")
-	addMobileChromeAppsPlugin("org.chromium.iosSocketsCommon", "chrome.iosSocketsCommon")
-	addMobileChromeAppsPlugin("org.chromium.socket", "chrome.socket")
-	addMobileChromeAppsPlugin("org.chromium.sockets.tcp", "chrome.sockets.tcp")
+	addMobileChromeAppsPlugin("org.chromium.common", "cordova-plugin-chrome-apps-common")
+	addMobileChromeAppsPlugin("org.chromium.system.network", "cordova-plugin-chrome-apps-system-network")
+	addMobileChromeAppsPlugin("org.chromium.iosSocketsCommon", "cordova-plugin-chrome-apps-iosSocketsCommon")
+	addMobileChromeAppsPlugin("org.chromium.socket", "cordova-plugin-chrome-apps-socket")
+	addMobileChromeAppsPlugin("org.chromium.sockets.tcp", "cordova-plugin-chrome-apps-sockets-tcp")
 	#addMobileChromeAppsPlugin("org.chromium.sockets.tcpserver", "chrome.sockets.tcpServer")	# requires cordova 4.0 on Android.
-	addMobileChromeAppsPlugin("org.chromium.sockets.udp", "chrome.sockets.udp")
+	addMobileChromeAppsPlugin("org.chromium.sockets.udp", "cordova-plugin-chrome-apps-sockets-udp")
 
 	# Plugins on the local file system.
 	addPlugin("com.evothings.ble", "../cordova-ble",

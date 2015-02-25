@@ -17,11 +17,12 @@
 #
 # Possible build switches are:
 # c - clean target platform before building
-# ca - clean everything before building (removes plugins and target platform)
+# ca - clean everything before building (removes platforms, plugins and documentation)
 # i - install after building
 # android - build Android
 # wp8 - build Windows Phone 8
 # ios - build iOS
+# doc - build documentation instead of cordova app
 #
 # By default, Android will be built.
 # Only one platform may be built per invocation.
@@ -54,6 +55,7 @@
 require "fileutils"
 require 'rexml/document'
 require "./utils.rb"
+require "./documenter.rb"
 
 include FileUtils::Verbose
 
@@ -78,6 +80,10 @@ require lc if(File.exists?(lc))
 @clean = false
 @cleanall = false
 @install = false
+@documentation = false
+
+# local variables
+@documentIndex = {}
 
 def testCordovaVersion
 	installedVersion = open("|cordova -v").read.strip
@@ -108,6 +114,8 @@ def parseCommandParameters
 				@cleanall = true
 			when "i"
 				@install = true
+			when "doc"
+				@documentation = true
 			when "android", "wp8", "ios"
 				@platform = arg
 			else raise "Invalid argument #{arg}"
@@ -121,7 +129,7 @@ def createDirectories
 end
 
 def addPlugins
-	def addPlugin(name, location = name, remote = false, branch = false)
+	def addPlugin(name, documenter, location = name, remote = false, branch = false)
 		# If a specific location is given, this is considered to be a
 		# "local" plugin, which will be scanned for git version info.
 		# (location can be a file path or URL).
@@ -143,62 +151,72 @@ def addPlugins
 		if(!File.exist?("plugins/#{name}"))
 			sh "cordova -d plugin add #{location}"
 		end
-	end
-
-	def addMobileChromeAppsPlugin(name, location = name)
-		if(location != name)
-			url = 'https://github.com/MobileChromeApps/' + location
-			if(defined?(CONFIG_MOBILE_CHROME_APPS_DIR))
-				# If location and config are specified that is used.
-				addPlugin(name, CONFIG_MOBILE_CHROME_APPS_DIR + "/" + location, url)
-			else
-				# If only location is specified use default Chrome Apps plugins directory.
-				addPlugin(name, "../MobileChromeApps/" + location, url)
-			end
-		else
-			# Use Cordova package name for network install if location is not specified.
-			addPlugin(name)
+		if(@documentation && documenter)
+			@documentIndex[name] = documenter.run(name, "plugins/#{name}")
 		end
 	end
 
+	def addMobileChromeAppsPlugin(docUrl, name, location = name)
+		if(location != name)
+			url = 'https://github.com/MobileChromeApps/' + location
+			d = ChromeDocumenter.new(docUrl) if(docUrl)
+			if(defined?(CONFIG_MOBILE_CHROME_APPS_DIR))
+				# If location and config are specified that is used.
+				addPlugin(name, d, CONFIG_MOBILE_CHROME_APPS_DIR + "/" + location, url)
+			else
+				# If only location is specified use default Chrome Apps plugins directory.
+				addPlugin(name, d, "../MobileChromeApps/" + location, url)
+			end
+		else
+			# Use Cordova package name for network install if location is not specified.
+			addPlugin(name, d)
+		end
+	end
+
+	def addApachePlugin(name)
+		addPlugin(name, MarkdownDocumenter.new('doc/index.md'))
+	end
+
 	@extraPlugins.each do |ep|
-		addPlugin(ep[:name], ep[:location])
+		addPlugin(ep[:name], nil, ep[:location])
 	end
 
 	# Add standard Cordova plugins.
-	addPlugin("org.apache.cordova.battery-status")
-	addPlugin("org.apache.cordova.camera")
-	addPlugin("org.apache.cordova.console")
-	addPlugin("org.apache.cordova.device")
-	addPlugin("org.apache.cordova.device-motion")
-	addPlugin("org.apache.cordova.device-orientation")
-	addPlugin("org.apache.cordova.dialogs")
-	addPlugin("org.apache.cordova.geolocation")
-	addPlugin("org.apache.cordova.globalization")
-	addPlugin("org.apache.cordova.inappbrowser")
-	addPlugin("org.apache.cordova.network-information")
-	addPlugin("org.apache.cordova.vibration")
+	addApachePlugin("org.apache.cordova.battery-status")
+	addApachePlugin("org.apache.cordova.camera")
+	addApachePlugin("org.apache.cordova.console")
+	addApachePlugin("org.apache.cordova.device")
+	addApachePlugin("org.apache.cordova.device-motion")
+	addApachePlugin("org.apache.cordova.device-orientation")
+	addApachePlugin("org.apache.cordova.dialogs")
+	addApachePlugin("org.apache.cordova.geolocation")
+	addApachePlugin("org.apache.cordova.globalization")
+	addApachePlugin("org.apache.cordova.inappbrowser")
+	addApachePlugin("org.apache.cordova.network-information")
+	addApachePlugin("org.apache.cordova.vibration")
 
 	# MobileChromeApps plugins.
-	addMobileChromeAppsPlugin("org.chromium.common", "cordova-plugin-chrome-apps-common")
-	addMobileChromeAppsPlugin("org.chromium.system.network", "cordova-plugin-chrome-apps-system-network")
-	addMobileChromeAppsPlugin("org.chromium.iosSocketsCommon", "cordova-plugin-chrome-apps-iosSocketsCommon")
-	addMobileChromeAppsPlugin("org.chromium.socket", "cordova-plugin-chrome-apps-socket")
-	addMobileChromeAppsPlugin("org.chromium.sockets.tcp", "cordova-plugin-chrome-apps-sockets-tcp")
-	#addMobileChromeAppsPlugin("org.chromium.sockets.tcpserver", "chrome.sockets.tcpServer")	# requires cordova 4.0 on Android.
-	addMobileChromeAppsPlugin("org.chromium.sockets.udp", "cordova-plugin-chrome-apps-sockets-udp")
+	addMobileChromeAppsPlugin(nil, "org.chromium.common", "cordova-plugin-chrome-apps-common")
+	addMobileChromeAppsPlugin('https://developer.chrome.com/apps/system_network',
+		"org.chromium.system.network", "cordova-plugin-chrome-apps-system-network")
+	addMobileChromeAppsPlugin(nil, "org.chromium.iosSocketsCommon", "cordova-plugin-chrome-apps-iosSocketsCommon")
+	addMobileChromeAppsPlugin('https://developer.chrome.com/apps/socket',
+		"org.chromium.socket", "cordova-plugin-chrome-apps-socket")
+	addMobileChromeAppsPlugin('https://developer.chrome.com/apps/sockets_tcp',
+		"org.chromium.sockets.tcp", "cordova-plugin-chrome-apps-sockets-tcp")
+	#addMobileChromeAppsPlugin('https://developer.chrome.com/apps/sockets_tcpServer',
+		#"org.chromium.sockets.tcpserver", "chrome.sockets.tcpServer")	# requires cordova 4.0 on Android.
+	addMobileChromeAppsPlugin('https://developer.chrome.com/apps/sockets_udp',
+		"org.chromium.sockets.udp", "cordova-plugin-chrome-apps-sockets-udp")
 
 	# Plugins on the local file system.
-	addPlugin("com.evothings.ble", "../cordova-ble",
-		"https://github.com/evothings/cordova-ble")
-
-	addPlugin("com.unarin.cordova.beacon", "../cordova-plugin-ibeacon",
+	addPlugin("com.unarin.cordova.beacon", MarkdownDocumenter.new('README.md'), "../cordova-plugin-ibeacon",
 		"https://github.com/evothings/cordova-plugin-ibeacon", "evothings-1.0.0")
 
-	addPlugin("pl.makingwaves.estimotebeacons", "../phonegap-estimotebeacons/",
+	addPlugin("pl.makingwaves.estimotebeacons", MarkdownDocumenter.new('documentation.md'), "../phonegap-estimotebeacons/",
 		"https://github.com/evothings/phonegap-estimotebeacons")
 
-	addPlugin("de.appplant.cordova.plugin.local-notification", "../cordova-plugin-local-notifications",
+	addPlugin("de.appplant.cordova.plugin.local-notification", MarkdownDocumenter.new('README.md'), "../cordova-plugin-local-notifications",
 		"https://github.com/evothings/cordova-plugin-local-notifications", "evothings-master")
 
 	# Classic Bluetooth for Android.
@@ -208,19 +226,23 @@ def addPlugins
 		else
 			location = "../BluetoothSerial"
 		end
-		addPlugin("com.megster.cordova.bluetoothserial", location, "https://github.com/don/BluetoothSerial")
+		addPlugin("com.megster.cordova.bluetoothserial", MarkdownDocumenter.new('README.md'),
+			location, "https://github.com/don/BluetoothSerial")
 	end
 
+	addPlugin("com.evothings.ble", JdocDocumenter.new('ble.js'), "../cordova-ble",
+		"https://github.com/evothings/cordova-ble")
+
 	# Standard plugins that are not included.
-	#addPlugin("org.apache.cordova.contacts")
-	#addPlugin("org.apache.cordova.file")
-	#addPlugin("org.apache.cordova.file-transfer")
-	#addPlugin("org.apache.cordova.media")
-	#addPlugin("org.apache.cordova.media-capture")
-	#addPlugin("org.apache.cordova.splashscreen")
+	#addApachePlugin("org.apache.cordova.contacts")
+	#addApachePlugin("org.apache.cordova.file")
+	#addApachePlugin("org.apache.cordova.file-transfer")
+	#addApachePlugin("org.apache.cordova.media")
+	#addApachePlugin("org.apache.cordova.media-capture")
+	#addApachePlugin("org.apache.cordova.splashscreen")
 
 	# SMS plugin is not included.
-	#addPlugin("org.apache.cordova.plugin.sms", "../phonegap-sms-plugin")
+	#addPlugin("org.apache.cordova.plugin.sms", MarkdownDocumenter('readme.md'), "../phonegap-sms-plugin")
 end
 
 def fileRead(filePath)
@@ -445,13 +467,18 @@ def removeUnusedImages
 	end
 end
 
+def buildDocs
+	addPlugins
+	writeDocumentationIndex
+end
+
 def build
+	# Get command line parameters.
+	parseCommandParameters
+
 	# Check that the Cordova version installed is
 	# compatible with build script.
 	testCordovaVersion
-
-	# Get command line parameters.
-	parseCommandParameters
 
 	# Remove target platform if switch "c" (clean) is given.
 	if(@clean)
@@ -462,13 +489,19 @@ def build
 	if(@cleanall)
 		rm_rf("platforms")
 		rm_rf("plugins")
+		rm_rf("gen-doc")
+	end
+
+	# Create directories required for the build.
+	createDirectories
+
+	if(@documentation)
+		buildDocs
+		return
 	end
 
 	# Create www/index.html with current version info.
 	createIndexFileWithVersionInfo
-
-	# Create directories required for the build.
-	createDirectories
 
 	# Add target platform if not present.
 	if(!File.exist?("platforms/#{@platform}"))

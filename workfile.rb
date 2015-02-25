@@ -390,6 +390,7 @@ def copyIconsAndPlatformFiles
 		copyIOSIcon.call("icon-white-76.png", "icon-76.png")
 		copyIOSIcon.call("icon-white-144.png", "icon-72@2x.png")
 		copyIOSIcon.call("icon-white-152.png", "icon-76@2x.png")
+		copyIOSIcon.call("icon-white-180.png", "icon-60@3x.png")
 	end
 
 	# Copy iOS splash screens.

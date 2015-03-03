@@ -5,6 +5,12 @@ require 'net/https'
 
 ChromeIndex = []
 
+def writeList(file)
+	@documentIndex.each do |name, path|
+		file.puts "\t<a href=\"#{path}\" target=\"_blank\">#{name}</a><br />"
+	end
+end
+
 def writeDocumentationIndex
 	# download chrome docs, all at the same time.
 	cd 'gen-doc'
@@ -31,11 +37,14 @@ def writeDocumentationIndex
 		file.puts "\t<title>Evothings Client plugin reference index</title>"
 		file.puts '</head>'
 		file.puts '<body>'
-		@documentIndex.each do |name, path|
-			file.puts "\t<a href=\"#{path}\" target=\"_blank\">#{name}</a><br />"
-		end
+		writeList(file)
 		file.puts '</body>'
 		file.puts '</html>'
+	end
+
+	# generate embeddable index.
+	open('gen-doc/index.html.embed', 'wb') do |file|
+		writeList(file)
 	end
 end
 

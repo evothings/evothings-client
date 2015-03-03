@@ -62,7 +62,7 @@ class JdocDocumenter
 		end
 	end
 	def run(name, location)
-		JdocDocumenter.checkVersion
+		#JdocDocumenter.checkVersion
 		cwd = pwd
 		cd location
 		sh "jsdoc -l -c conf.json #{@jsFilename}"

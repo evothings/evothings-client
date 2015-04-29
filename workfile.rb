@@ -459,9 +459,10 @@ def copyStylesheetAndJQuery
 	if(File.exist?("../evothings-examples/resources"))
 		cp_r(Dir["../evothings-examples/resources/ui"], "www/")
 		cp_r(Dir["../evothings-examples/resources/libs/jquery"], "www/libs/")
-		mkdir_p("www/libs/evothings/")
+		mkdir_p("www/libs/evothings/ui")
 		cp("../evothings-examples/resources/libs/evothings/evothings.js",
 			"www/libs/evothings/evothings.js")
+		cp_r(Dir["../evothings-examples/resources/libs/evothings/ui"], "www/libs/evothings/")
 	else
 		raise "Couldn't find ../evothings-examples/resources."
 	end

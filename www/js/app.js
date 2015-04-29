@@ -31,6 +31,8 @@ app.initialize = function()
 	// Page navigation.
 	$('#info_button').bind('click', {articleId: 'info'}, app.showArticle)
 
+	app.showCachedApps()
+
 	$(function()
 	{
 		FastClick.attach(document.body)
@@ -56,6 +58,54 @@ app.initialize = function()
 				}, 0)
 			})
 		})*/
+	})
+}
+
+/*
+Format of app-list.json:
+{
+	"apps": {
+		<name>: {
+			"index": <string>
+		},
+		...
+	},
+	"count": <int>,
+}
+
+The name of an app may contain spaces and other weird characters, and is therefore not suitable for filenames or URLs.
+It is, however, the apps unique identifier, and must therefore be the key in the "apps" table.
+The app's "index" is the string used to locate the app in URLs and filesystems.
+Programs that don't modify the index should not make any assumptions about its format, other than the aformentioned URL-suitability.
+*/
+
+app.showCachedApps = function()
+{
+	$.ajax("evocachemeta:app-list.json")
+	.done(function(data, textStatus, xhr)
+	{
+		var cachedApps = data.apps
+
+		if (!cachedApps || cachedApps.length <= 0)
+		{
+			var msg = 'No apps cached.'
+			$('#hyper-cache-message').html(msg)
+		}
+		else for(var appName in cachedApps)
+		{
+			var app = cachedApps[appName]
+			var list =
+				'<li class="arrow"><a href="evocache:'+app.index+'">' +
+				'<strong>'+appName+'</strong>' +
+				'</a></li>'
+			$('#hyper-cache-list').html(list)
+		}
+	})
+	.fail(function(xhr, textStatus, errorThrown)
+	{
+		var msg = "$.ajax.fail("+textStatus+", "+errorThrown+")"
+		console.log(msg)
+		$('#hyper-cache-nessage').html(msg)
 	})
 }
 

@@ -15,6 +15,13 @@
 #
 # The workfile is not responsible for keeping the plugins up-to-date; you must do this manually.
 #
+# Required gems:
+# redcarpet
+#
+# Node.js is required.
+# Required node.js modules (npm):
+# cordova@3.6.3-0.2.13
+#
 # Possible build switches are:
 # c - clean target platform before building
 # ca - clean everything before building (removes platforms, plugins and documentation)

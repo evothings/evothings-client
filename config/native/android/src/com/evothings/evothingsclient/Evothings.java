@@ -24,6 +24,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.Log;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
@@ -43,6 +44,24 @@ public class Evothings extends CordovaActivity
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
+		if(BuildConfig.DEBUG)
+		{
+			// Detect all manner of bad things.
+			// This code is active only in debug builds.
+			/*
+			// Cordova does disk access; don't enable this check.
+			StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+				.detectAll()
+				.penaltyLog()
+				.penaltyDeath()
+				.build());
+			*/
+			StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+				.detectAll()
+				.penaltyLog()
+				.penaltyDeath()
+				.build());
+		}
 		super.onCreate(savedInstanceState);
 		super.init();
 
@@ -143,17 +162,18 @@ public class Evothings extends CordovaActivity
 				// Check first path component; it must match the window.location of the WebView.
 				// This will prevent apps from loading files from other apps.
 				Uri uri = Uri.parse(url);
-				if(mCachedApp != uri.getAuthority()) {
-					LOG.e("EvothingsWebViewClient", "evocache violation ("+mCachedApp+"): "+url);
+				if(!mCachedApp.equals(uri.getAuthority())) {
+					LOG.e("EvothingsWebViewClient", "evocache violation ("+mCachedApp+" != "+uri.getAuthority()+"), "+url);
 					return new WebResourceResponse("text/plain", "UTF-8", null);	// Results in a 404.
 				}
 				File cacheRoot = mEvothings.getDir("evocache", MODE_PRIVATE);
 				File appRoot = new File(cacheRoot, mCachedApp);
 				File targetFile = new File(appRoot, uri.getPath());
-				if(!targetFile.exists()) {
+				if(!targetFile.isFile()) {
 					LOG.e("EvothingsWebViewClient", "evocache 404 ("+mCachedApp+", "+url+")");
 					return new WebResourceResponse("text/plain", "UTF-8", null);	// Results in a 404.
 				}
+				LOG.i("EvothingsWebViewClient", "evocache 200 ("+mCachedApp+", "+url+", "+targetFile.toString()+")");
 				return handleCordovaURL(view, Uri.parse(targetFile.toURI().toString()), url);
 			}
 			else if(url.startsWith("evocachemeta:"))
@@ -162,6 +182,7 @@ public class Evothings extends CordovaActivity
 					File cacheRoot = mEvothings.getDir("evocache", MODE_PRIVATE);
 					File targetFile = new File(cacheRoot, "app-list.json");
 					if(!targetFile.exists()) {
+						LOG.e("EvothingsWebViewClient", "creating app-list.json...");
 						createAppListJson(targetFile);
 					}
 					LOG.e("EvothingsWebViewClient", "serving app-list.json...");
@@ -203,7 +224,7 @@ public class Evothings extends CordovaActivity
 				return true;	// we handled it.
 			}
 			// Load a cached app.
-			else if(url.startsWith("evocache:"))
+			else if(url.startsWith("evocache://"))
 			{
 				Uri uri = Uri.parse(url);
 				if(!uri.getHost().equals(uri.getAuthority()))
@@ -218,15 +239,8 @@ public class Evothings extends CordovaActivity
 			// Cache a new app or update a cached app.
 			else if(url.startsWith("evocacheadd:"))
 			{
-				try
-				{
-					return evoCacheAdd(url);
-				}
-				catch(Exception e)
-				{
-					e.printStackTrace();
-					return false;
-				}
+				new EvoCacheAddThread(url).start();
+				return true;	// we'll handle it.
 			}
 			else
 			{
@@ -234,7 +248,30 @@ public class Evothings extends CordovaActivity
 			}
 		}
 
-		void downloadCacheFile(String baseUrl, String appIndex, String url) throws Exception {
+		class EvoCacheAddThread extends Thread
+		{
+			final String mUrl;
+
+			EvoCacheAddThread(String url)
+			{
+				mUrl = url;
+			}
+
+			public void run()
+			{
+				try
+				{
+					evoCacheAdd(mUrl);
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+
+		void downloadCacheFile(File cacheRoot, String baseUrl, String appIndex, String url) throws Exception {
+			LOG.i("EvothingsWebViewClient", "downloadCacheFile("+cacheRoot.toString()+", "+baseUrl+", "+appIndex+", "+url+")");
 			// we got a file, let's download it.
 			int protocolIndex = url.indexOf("://");
 			if(protocolIndex != -1 || url.startsWith("//")) {
@@ -247,18 +284,24 @@ public class Evothings extends CordovaActivity
 			if(url.startsWith("/")) {
 				// non-relative URL. remove the prefix slash to make it usable.
 				filename = url.substring(1);
-				fileUrl = baseUrl + filename;
 			} else {
 				filename = url;
-				fileUrl = baseUrl + filename;
 			}
-			String path = "evocache/"+appIndex+"/"+filename;
+			fileUrl = baseUrl + filename;
+			String subPath = appIndex+"/"+filename;
 
 			// create the directory for the file.
-			mEvothings.getDir(new File(path).getParent(), Context.MODE_PRIVATE);
+			File file = new File(cacheRoot, subPath);
+			File parent = file.getParentFile();
+			parent.mkdirs();
+			if(!parent.isDirectory()) {
+				String msg = "evocacheadd directory creation failed ("+url+", "+parent.toString()+")";
+				LOG.e("EvothingsWebViewClient", msg);
+				throw new Exception(msg);
+			}
 
 			// open the file for writing.
-			FileOutputStream fos = new FileOutputStream(path);
+			FileOutputStream fos = new FileOutputStream(file);
 
 			// open the remote file.
 			InputStream fis = new URL(fileUrl).openConnection().getInputStream();
@@ -279,7 +322,7 @@ public class Evothings extends CordovaActivity
 			return str;
 		}
 
-		boolean evoCacheAdd(String url) throws Exception {
+		void evoCacheAdd(String url) throws Exception {
 			// Load the app list.
 			JSONObject appList;
 			JSONObject list = null;
@@ -295,11 +338,13 @@ public class Evothings extends CordovaActivity
 				list = new JSONObject();
 
 			// Load the manifest.
-			String baseUrl = "http" + url.substring(11) + "/";
-			URL manifestUrl = new URL(baseUrl + "evocache-manifest.json");
-			JSONObject manifest = new JSONObject(utf8StreamToString(manifestUrl.openConnection().getInputStream()));
+			String manifestUrl = "http" + url.substring("evocacheadd".length());
+			URL manifestURL = new URL(manifestUrl);
+			String baseUrl = manifestUrl.substring(0, manifestUrl.lastIndexOf("/")+1);
+			JSONObject manifest = new JSONObject(utf8StreamToString(manifestURL.openConnection().getInputStream()));
 			String appName = manifest.getString("name");
 			JSONArray files = manifest.getJSONArray("files");
+			// todo: manifest.getString("startPage")
 
 			// Construct the app's list entry, or load it if this is a previously cached app.
 			int appIndex = appList.optInt("count", 0);
@@ -308,29 +353,38 @@ public class Evothings extends CordovaActivity
 				// App was not previously cached. Construct a new entry.
 				entry = new JSONObject();
 				appIndex++;
+				entry.put("index", appIndex);
 			} else {
 				// App was previously cached. Overwrite the existing entry.
 				// Reuse the cache directory.
 				appIndex = entry.getInt("index");
+
+				// TODO: remove all files in app's cache directory.
 			}
 
 			// Download the app's files.
 			for(int i=0; i<files.length(); i++) {
-				downloadCacheFile(baseUrl, Integer.toString(appIndex), files.getString(i));
+				downloadCacheFile(cacheRoot, baseUrl, Integer.toString(appIndex), files.getString(i));
 			}
 
+			// Update entry.
+			list.put(appName, entry);
+
+			// Update counter.
 			appList.put("count", appIndex);
 
 			// Save the app list.
 			appList.put("apps", list);
 			FileOutputStream fos = new FileOutputStream(appListFile);
-			fos.write(appList.toString().getBytes("UTF-8"));
+			String appListString = appList.toString();
+			LOG.i("EvothingsWebViewClient", "appListFile: "+appListFile.toString());
+			LOG.i("EvothingsWebViewClient", "appListString: "+appListString);
+			fos.write(appListString.getBytes("UTF-8"));
 			fos.close();
+			LOG.i("EvothingsWebViewClient", "wrote app-list.json.");
 
 			// Load the original client start-page. It should display the updated app list.
 			appView.loadUrlIntoView("file:///android_asset/www/index.html");
-
-			return true;
 		}
 
 

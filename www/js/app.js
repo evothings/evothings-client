@@ -33,7 +33,7 @@ app.initialize = function()
 
 	app.showCachedApps()
 
-	$(function()
+	evothings.scriptsLoaded(function()
 	{
 		FastClick.attach(document.body)
 
@@ -84,18 +84,27 @@ app.showCachedApps = function()
 	$.ajax("evocachemeta:app-list.json")
 	.done(function(data, textStatus, xhr)
 	{
-		var cachedApps = data.apps
+		console.log(data)
+		var cachedApps = JSON.parse(data)["apps"]
+		var list = ''
 
-		if (!cachedApps || cachedApps.length <= 0)
+		if (!cachedApps)
 		{
 			var msg = 'No apps cached.'
+			$('#hyper-cache-message').html(msg)
+		}
+		else if(Object.keys(cachedApps).length == 0)
+		{
+			var msg = Object.keys(cachedApps).length+' apps cached.'
 			$('#hyper-cache-message').html(msg)
 		}
 		else for(var appName in cachedApps)
 		{
 			var app = cachedApps[appName]
-			var list =
-				'<li class="arrow"><a href="evocache:'+app.index+'">' +
+			// todo: need app's start page here.
+			// for now: works only with apps that have index.html.
+			var list +=
+				'<li class="arrow"><a href="evocache://'+app.index+'/index.html">' +
 				'<strong>'+appName+'</strong>' +
 				'</a></li>'
 			$('#hyper-cache-list').html(list)

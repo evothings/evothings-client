@@ -10,6 +10,6 @@ It consists of a Cordova WebView, a bunch of useful plugins, and an intro page t
 Dependencies
 
 - Ruby and the Ruby gem 'redcarpet' (gem install redcarpet)
-- Check out the project evothings/examples in a directory parallell to this
+- Check out the evothings/examples project at the same top level directory as the evothings-client project.
 
 Run the Ruby script 'workfile.rb'. It generates files, initializes the Cordova project, fetches plugins, builds the app, and, optionally, installs it on a connected device.

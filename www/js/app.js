@@ -66,17 +66,14 @@ Format of app-list.json:
 {
 	"apps": {
 		<name>: {
-			"index": <string>
+			"url": <string>
 		},
 		...
 	},
-	"count": <int>,
 }
 
 The name of an app may contain spaces and other weird characters, and is therefore not suitable for filenames or URLs.
-It is, however, the apps unique identifier, and must therefore be the key in the "apps" table.
-The app's "index" is the string used to locate the app in URLs and filesystems.
-Programs that don't modify the index should not make any assumptions about its format, other than the aformentioned URL-suitability.
+It is, however, the app's unique identifier, and must therefore be the key in the "apps" table.
 */
 
 app.showCachedApps = function()
@@ -84,9 +81,8 @@ app.showCachedApps = function()
 	$.ajax("evocachemeta:app-list.json")
 	.done(function(data, textStatus, xhr)
 	{
-		console.log(data)
-		var cachedApps = JSON.parse(data)["apps"]
-		var list = ''
+		//console.log(JSON.stringify(data))
+		var cachedApps = data["apps"]
 
 		if (!cachedApps)
 		{
@@ -98,15 +94,19 @@ app.showCachedApps = function()
 			var msg = Object.keys(cachedApps).length+' apps cached.'
 			$('#hyper-cache-message').html(msg)
 		}
-		else for(var appName in cachedApps)
+		else
 		{
-			var app = cachedApps[appName]
-			// todo: need app's start page here.
-			// for now: works only with apps that have index.html.
-			var list +=
-				'<li class="arrow"><a href="evocache://'+app.index+'/index.html">' +
-				'<strong>'+appName+'</strong>' +
-				'</a></li>'
+			var list = ''
+			for(var appName in cachedApps)
+			{
+				var app = cachedApps[appName]
+				// todo: need app's start page here.
+				// for now: works only with apps that have index.html.
+				list +=
+					'<li class="arrow"><a href="'+app.url+'">' +
+					'<strong>'+appName+'</strong>' +
+					'</a></li>'
+			}
 			$('#hyper-cache-list').html(list)
 		}
 	})

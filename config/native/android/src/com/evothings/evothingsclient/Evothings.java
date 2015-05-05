@@ -346,6 +346,9 @@ public class Evothings extends CordovaActivity
 				entry = new JSONObject();
 				appIndex++;
 				entry.put("index", appIndex);
+
+				// Update counter.
+				appList.put("count", appIndex);
 			} else {
 				// App was previously cached. Overwrite the existing entry.
 				// Reuse the cache directory.
@@ -361,9 +364,6 @@ public class Evothings extends CordovaActivity
 
 			// Update entry.
 			list.put(appName, entry);
-
-			// Update counter.
-			appList.put("count", appIndex);
 
 			// Save the app list.
 			appList.put("apps", list);

@@ -78,6 +78,7 @@ It is, however, the app's unique identifier, and must therefore be the key in th
 
 app.showCachedApps = function()
 {
+	$('#hyper-cache-message').html("Fetching cache list...")
 	$.ajax("evocachemeta:app-list.json")
 	.done(function(data, textStatus, xhr)
 	{
@@ -108,13 +109,14 @@ app.showCachedApps = function()
 					'</a></li>'
 			}
 			$('#hyper-cache-list').html(list)
+			$('#hyper-cache-message').html("")
 		}
 	})
 	.fail(function(xhr, textStatus, errorThrown)
 	{
-		var msg = "$.ajax.fail("+textStatus+", "+errorThrown+")"
+		$('#hyper-cache-nessage').html("ajax fail")
+		var msg = "$.ajax.fail2("+textStatus+", "+errorThrown+")"
 		console.log(msg)
-		$('#hyper-cache-nessage').html(msg)
 	})
 }
 

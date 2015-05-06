@@ -258,6 +258,8 @@ public class Evothings extends CordovaActivity
 				catch(Exception e)
 				{
 					e.printStackTrace();
+					// Fatal error, let's kill the app.
+					throw new Error(e);
 				}
 			}
 		}
@@ -336,6 +338,7 @@ public class Evothings extends CordovaActivity
 			JSONObject manifest = new JSONObject(utf8StreamToString(manifestURL.openConnection().getInputStream()));
 			String appName = manifest.getString("name");
 			JSONArray files = manifest.getJSONArray("files");
+			String startPage = manifest.getString("startPage");
 			// todo: manifest.getString("startPage")
 
 			// Construct the app's list entry, or load it if this is a previously cached app.
@@ -353,9 +356,11 @@ public class Evothings extends CordovaActivity
 				// App was previously cached. Overwrite the existing entry.
 				// Reuse the cache directory.
 				appIndex = entry.getInt("index");
-
-				// TODO: remove all files in app's cache directory.
 			}
+
+			entry.put("startPage", startPage);
+
+			// TODO: remove all files in app's cache directory.
 
 			// Download the app's files.
 			for(int i=0; i<files.length(); i++) {
@@ -399,7 +404,7 @@ public class Evothings extends CordovaActivity
 				String name = keys.next();
 				JSONObject nativeApp = nativeList.getJSONObject(name);
 				String index = nativeApp.getString("index");
-				String subPath = index+"/index.html";	// TODO: allow index files of any name.
+				String subPath = index+"/"+nativeApp.getString("startPage");
 				File file = new File(cacheRoot, subPath);
 				JSONObject clientApp = new JSONObject();
 				clientApp.put("url", file.toURI().toString());

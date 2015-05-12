@@ -31,11 +31,11 @@ app.initialize = function()
 	// Page navigation.
 	$('#info_button').bind('click', {articleId: 'info'}, app.showArticle)
 
-	app.showCachedApps()
-
 	evothings.scriptsLoaded(function()
 	{
 		FastClick.attach(document.body)
+
+		app.showCachedApps()
 
 		/* Add a clear button to input fields. */
 		/*$('input').each(function() {
@@ -98,18 +98,25 @@ app.showCachedApps = function()
 		else
 		{
 			var list = ''
+			var count = 0
 			for(var appName in cachedApps)
 			{
-				var app = cachedApps[appName]
-				// todo: need app's start page here.
-				// for now: works only with apps that have index.html.
+				var cachedApp = cachedApps[appName]
 				list +=
-					'<li class="arrow"><a href="'+app.url+'">' +
+					'<li class="arrow" id="ca'+count+'"><a href="'+cachedApp.url+'">' +
 					'<strong>'+appName+'</strong>' +
 					'</a></li>'
+				count += 1
 			}
 			$('#hyper-cache-list').html(list)
 			$('#hyper-cache-message').html("")
+			count = 0
+			for(var appName in cachedApps)
+			{
+				// longpress pops up a menu with DELETE <todo: and some other (info) choices>.
+				app.longPress('ca'+count, function() { app.showCachedAppMenu(appName, cachedApp); })
+				count += 1
+			}
 		}
 	})
 	.fail(function(xhr, textStatus, errorThrown)
@@ -117,6 +124,126 @@ app.showCachedApps = function()
 		$('#hyper-cache-nessage').html("ajax fail")
 		var msg = "$.ajax.fail2("+textStatus+", "+errorThrown+")"
 		console.log(msg)
+	})
+	app.longPress('hyper-cache-title', function() {})
+}
+
+app.createMenu = function()
+{
+	var bg = document.createElement('div')
+	bg.id = 'hyper-cached-app-background'
+	bg.style.width = '100%'
+	bg.style.height = '100%'
+	bg.style.left = '0'
+	bg.style.top = '0'
+	bg.style.position = 'absolute'
+	bg.style.background = '#000000'
+	bg.style.opacity = '0.5'
+	bg.style.visibility = 'visible'
+	bg.style.zIndex = '999998'
+
+	// remove the menu if you click on the background.
+	bg.addEventListener('click', function()
+	{
+		document.body.removeChild(bg)
+	})
+
+	// create the menu itself
+	var menu = document.createElement('div')
+
+	menu.id = 'hyper-cached-app-menu'
+	menu.style.width = '80%'
+	menu.style.position = 'absolute'
+	menu.style.left = '5%'
+	menu.style.bottom = '40%'
+	menu.style.padding = '5% 5%'
+	menu.style.borderRadius = '4%'
+	menu.style.MozBorderRadius = '4%'
+	menu.style.WebkitBorderRadius = '4%'
+	menu.style.background = '#FFFFFF'
+	menu.style.opacity = '1'
+	menu.style.border = '1px solid #000000'
+	menu.style.fontFamily = 'sans-serif'
+	menu.style.fontSize = '18pt'
+	menu.style.fontWeight = 'bold'
+	menu.style.color = '#000000'
+	menu.style.textAlign = 'center'
+	menu.style.visibility = 'visible'
+	menu.style.zIndex = '999999'
+
+	bg.appendChild(menu)
+	document.body.appendChild(bg)
+
+	return menu
+}
+
+app.createMenuItem = function(data)
+{
+	var item = document.createElement('div')
+	item.innerHTML = data.text
+	item.addEventListener('click', function() {
+		data.action()
+		var bg = document.getElementById('hyper-cached-app-background')
+		document.removeChild(bg)
+	})
+	return item
+}
+
+// pop up a yes/cancel dialog box. call yesFunction if the user clicks "yes".
+app.yesOrCancel = function(questionText, yesFunction)
+{
+	return function()
+	{
+		var resultCallback = function(buttonIndex)
+		{
+			if(buttonIndex == 1)
+				yesFunction()
+		}
+		navigator.notification.confirm(questionText, resultCallback)
+	}
+}
+
+app.showCachedAppMenu = function(appName, cachedApp)
+{
+	var menuItems =
+	[
+		{
+			text: 'DELETE',
+			action: app.yesOrCancel("Delete "+appName+"?", function() { window.location.replace('evocachemeta:delete/'+cachedApp.index); }),
+		},
+	]
+
+	var menu = app.createMenu()
+
+	for(var i in menuItems)
+	{
+		var item = app.createMenuItem(menuItems[i])
+		menu.appendChild(item)
+	}
+}
+
+app.longPress = function(id, callback)
+{
+	var pressTimer
+	var el = document.getElementById(id)
+
+	el.addEventListener('touchend', function()
+	{
+		el.style.backgroundColor = "#f3f3f3"
+		clearTimeout(pressTimer)
+		// Clear timeout
+		return false;
+	})
+	el.addEventListener('touchstart', function()
+	{
+		el.style.backgroundColor = "#656565"
+		// Set timeout
+		pressTimer = window.setTimeout(function()
+		{
+			el.style.backgroundColor = "#f3f3f3"
+			callback()
+		}, 1000)
+		return false;
 	})
 }
 

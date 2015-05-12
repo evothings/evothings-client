@@ -28,6 +28,7 @@ import android.os.StrictMode;
 import android.util.Log;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
+import android.graphics.Bitmap;
 
 import java.io.*;
 import java.nio.*;
@@ -136,7 +137,11 @@ public class Evothings extends CordovaActivity
 		// Contains the name of the active cached app, or null if no cached app is active.
 		// "evocache:" URLs that don't match this name will not be allowed to load.
 		private String mCachedApp;
+
 		private Evothings mEvothings;
+
+		// Contains the URL of the currently loaded page, or null if no page has yet loaded.
+		private String mLoadedPage;
 
 		public EvothingsWebViewClient(Evothings evothings, CordovaWebView view)
 		{
@@ -166,9 +171,11 @@ public class Evothings extends CordovaActivity
 					return new WebResourceResponse("text/plain", "UTF-8", null);	// Results in a 404.
 				}
 			}
-			// TODO: maybe prevent origins that aren't file:///android_asset/www/index.html from accessing these resources?
+			// prevent origins that aren't our own start page from accessing these resources.
 			else if(url.startsWith("evocachemeta:"))
 			{
+				if(!ensureStartPage(url))
+					return super.shouldInterceptRequest(view, url);
 				if(url.equals("evocachemeta:app-list.json")) {
 					LOG.e("EvothingsWebViewClient", "serving app-list.json...");
 					try {
@@ -199,6 +206,32 @@ public class Evothings extends CordovaActivity
 				e.printStackTrace();
 			}
 		}
+
+    @Override
+    public void onPageStarted(WebView view, String url, Bitmap favicon)
+		{
+			mLoadedPage = url;
+			super.onPageStarted(view, url, favicon);
+		}
+
+		// returns true if the loaded page is the start page, false otherwise.
+		private boolean ensureStartPage(String url)
+		{
+			if(mLoadedPage == null)
+			{
+				LOG.e("EvothingsWebViewClient", "mLoadedPage null, "+url);
+			}
+			if(mLoadedPage.equals(Config.getStartUrl()))
+			{
+				return true;
+			}
+			else
+			{
+				LOG.e("EvothingsWebViewClient", "mLoadedPage "+mLoadedPage+", "+url);
+			}
+			return false;
+		}
+
 
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url)
@@ -234,9 +267,50 @@ public class Evothings extends CordovaActivity
 				new EvoCacheAddThread(url).start();
 				return true;	// we'll handle it.
 			}
+			// prevent origins that aren't our own start page from accessing these resources.
+			else if(url.startsWith("evocachemeta:"))
+			{
+				if(!ensureStartPage(url))
+					return false;
+				String metaUrl = url.substring("evocachemeta:".length());
+				if(metaUrl.startsWith("delete/"))
+				{
+					String deleteRequestAppIndex = metaUrl.substring("delete/".length());
+					new EvoCacheDeleteThread(deleteRequestAppIndex).start();
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
 			else
 			{
 				return false;	// system handles it.
+			}
+		}
+
+		class EvoCacheDeleteThread extends Thread
+		{
+			final String mIndex;
+
+			EvoCacheDeleteThread(String i)
+			{
+				mIndex = i;
+			}
+
+			public void run()
+			{
+				try
+				{
+					evoCacheDelete(mIndex);
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+					// Fatal error, let's kill the app.
+					throw new Error(e);
+				}
 			}
 		}
 
@@ -371,6 +445,13 @@ public class Evothings extends CordovaActivity
 			list.put(appName, entry);
 
 			// Save the app list.
+			saveAppList(appList, list, appListFile);
+
+			// Load the original client start-page. It should display the updated app list.
+			appView.loadUrlIntoView(Config.getStartUrl());
+		}
+
+		void saveAppList(JSONObject appList, JSONObject list, File appListFile) throws Exception {
 			appList.put("apps", list);
 			FileOutputStream fos = new FileOutputStream(appListFile);
 			String appListString = appList.toString();
@@ -379,9 +460,62 @@ public class Evothings extends CordovaActivity
 			fos.write(appListString.getBytes("UTF-8"));
 			fos.close();
 			LOG.i("EvothingsWebViewClient", "wrote app-list.json.");
+		}
+
+		void evoCacheDelete(String index) throws Exception {
+			// Load the app list.
+			JSONObject appList;
+			JSONObject list = null;
+			File cacheRoot = mEvothings.getDir("evocache", MODE_PRIVATE);
+			File appListFile = new File(cacheRoot, "app-list.json");
+			if(appListFile.exists()) {
+				appList = new JSONObject(utf8StreamToString(new FileInputStream(appListFile)));
+				list = appList.optJSONObject("apps");
+			} else {
+				appList = new JSONObject();
+			}
+			if(list == null)
+				list = new JSONObject();
+
+			// Get the entry of the app to be deleted
+			JSONObject entry = null;
+			String appName = null;
+			Iterator<String> keys = list.keys();
+			while(keys.hasNext()) {
+				appName = keys.next();
+				JSONObject e = list.getJSONObject(appName);
+				if(index.equals(e.getString("index"))) {
+					entry = e;
+					break;
+				}
+			}
+			if(entry == null) {
+				throw new Exception("evocachedel: index not found ("+index+")");
+			}
+
+			LOG.i("EvothingsWebViewClient", "deleting "+appName);
+
+			// Delete the app's cache directory.
+			File file = new File(cacheRoot, index);
+			rmRecursive(file);
+
+			// Remove the entry from the list.
+			list.remove(appName);
+
+			// Save the app list.
+			saveAppList(appList, list, appListFile);
 
 			// Load the original client start-page. It should display the updated app list.
-			appView.loadUrlIntoView("file:///android_asset/www/index.html");
+			appView.loadUrlIntoView(Config.getStartUrl());
+		}
+
+		void rmRecursive(File f) throws IOException {
+			if(f.isDirectory()) {
+				for(File c : f.listFiles())
+					rmRecursive(c);
+			}
+			if(!f.delete())
+				throw new IOException("Failed to delete file: " + f);
 		}
 
 		// The client's app-list.json has a different format from the native one.
@@ -408,6 +542,7 @@ public class Evothings extends CordovaActivity
 				File file = new File(cacheRoot, subPath);
 				JSONObject clientApp = new JSONObject();
 				clientApp.put("url", file.toURI().toString());
+				clientApp.put("index", index);
 				clientList.put(name, clientApp);
 				//LOG.i("EvothingsWebViewClient", name+": "+clientApp.toString());
 			}

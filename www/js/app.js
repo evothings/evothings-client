@@ -67,6 +67,7 @@ Format of app-list.json:
 	"apps": {
 		<name>: {
 			"url": <string>
+			"index": <string>
 		},
 		...
 	},
@@ -113,8 +114,13 @@ app.showCachedApps = function()
 			count = 0
 			for(var appName in cachedApps)
 			{
-				// longpress pops up a menu with DELETE <todo: and some other (info) choices>.
-				app.longPress('ca'+count, function() { app.showCachedAppMenu(appName, cachedApp); })
+				var cachedApp = cachedApps[appName];
+				// wrap variables in function to avoid for-loop madness.
+				(function(_appName, _cachedApp, _count)
+				{
+					// longpress pops up a menu with DELETE <todo: and some other (info) choices>.
+					app.longPress('ca'+_count, function() { app.showCachedAppMenu(_appName, _cachedApp); });
+				})(appName, cachedApp, count);
 				count += 1
 			}
 		}
@@ -137,8 +143,7 @@ app.createMenu = function()
 	bg.style.left = '0'
 	bg.style.top = '0'
 	bg.style.position = 'absolute'
-	bg.style.background = '#000000'
-	bg.style.opacity = '0.5'
+	bg.style.background = 'rgba(0,0,0,0.5)'
 	bg.style.visibility = 'visible'
 	bg.style.zIndex = '999998'
 
@@ -181,11 +186,8 @@ app.createMenuItem = function(data)
 {
 	var item = document.createElement('div')
 	item.innerHTML = data.text
-	item.addEventListener('click', function() {
-		data.action()
-		var bg = document.getElementById('hyper-cached-app-background')
-		document.removeChild(bg)
-	})
+	// we want the background to be removed here, but its own click handler will take care of that.
+	item.addEventListener('click', data.action)
 	return item
 }
 

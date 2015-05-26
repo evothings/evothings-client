@@ -66,7 +66,7 @@ require "./documenter.rb"
 
 include FileUtils::Verbose
 
-@requiredCordovaVersion = "3.6.3"
+@requiredCordovaVersion = "5.0.0"
 
 # Optionally set in localConfig.rb.
 @extraPlugins = []	# array of hashes with these keys: {:name, :location}
@@ -342,6 +342,9 @@ def modifyManifest
 	puts "Modifying #{filename}..."
 	doc = REXML::Document.new(fileRead(filename))
 	doc.elements.each('manifest/application/activity') do |el|
+		# Cordova 4+ set the default value to "MainActivity", which is no good for us.
+		el.add_attribute('android:name', 'Evothings')
+
 		hasEvothingsFilter = false
 		el.elements.each("intent-filter/data[@android:scheme='evothings']") do |e|
 			hasEvothingsFilter = true
@@ -539,7 +542,7 @@ def build
 
 	# Install debug build if switch "i" is given.
 	if(@install && @platform == "android")
-		sh "adb install -r platforms/android/ant-build/Evothings-debug.apk"
+		sh "adb install -r platforms/android/build/outputs/apk/android-debug.apk"
 	end
 end
 

@@ -38,6 +38,9 @@ import java.util.Iterator;
 
 import org.apache.cordova.CordovaResourceApi.OpenForReadResult;
 import org.apache.cordova.*;
+import org.apache.cordova.engine.SystemWebViewEngine;
+import org.apache.cordova.engine.SystemWebView;
+import org.apache.cordova.engine.SystemWebViewClient;
 
 import org.json.*;
 
@@ -117,10 +120,11 @@ public class Evothings extends CordovaActivity
 		url = "http" + url.substring(9);
 
 		// Load the URL in the Cordova web view.
-		this.appView.loadUrlIntoView(url);
+		this.appView.loadUrlIntoView(url, true);
 	}
 
-	// For Cordova 3.1+
+/*
+	// For Cordova 3.1+ to 3.6. Not available in 4.0.
 	@Override
 	protected CordovaWebViewClient makeWebViewClient(CordovaWebView webView)
 	{
@@ -131,8 +135,34 @@ public class Evothings extends CordovaActivity
 			? new CordovaWebViewClient(this, webView)
 			: new EvothingsWebViewClient(this, webView);
 	}
+*/
 
-	public class EvothingsWebViewClient extends IceCreamCordovaWebViewClient
+	// For Cordova 4.0+
+	@Override
+	protected CordovaWebViewEngine makeWebViewEngine() {
+		return new EvothingsWebViewEngine(this, preferences);
+	}
+
+	public class EvothingsWebViewEngine extends SystemWebViewEngine {
+		private Evothings mEvothings;
+
+		public EvothingsWebViewEngine(Evothings evothings, CordovaPreferences preferences) {
+			super(evothings, preferences);
+			mEvothings = evothings;
+		}
+
+		@Override
+		public void init(CordovaWebView parentWebView, CordovaInterface cordova, CordovaWebViewEngine.Client client,
+			CordovaResourceApi resourceApi, PluginManager pluginManager,
+			NativeToJsMessageQueue nativeToJsMessageQueue)
+		{
+			webView.setWebViewClient(new EvothingsWebViewClient(mEvothings, this));
+			super.init(parentWebView, cordova, client, resourceApi, pluginManager, nativeToJsMessageQueue);
+		}
+	}
+	// End Cordova 4.0+
+
+	public class EvothingsWebViewClient extends SystemWebViewClient
 	{
 		// Contains the name of the active cached app, or null if no cached app is active.
 		// "evocache:" URLs that don't match this name will not be allowed to load.
@@ -143,9 +173,9 @@ public class Evothings extends CordovaActivity
 		// Contains the URL of the currently loaded page, or null if no page has yet loaded.
 		private String mLoadedPage;
 
-		public EvothingsWebViewClient(Evothings evothings, CordovaWebView view)
+		public EvothingsWebViewClient(Evothings evothings, SystemWebViewEngine parentEngine)
 		{
-			super(evothings, view);
+			super(parentEngine);
 			mEvothings = evothings;
 		}
 
@@ -175,7 +205,7 @@ public class Evothings extends CordovaActivity
 			else if(url.startsWith("evocachemeta:"))
 			{
 				if(!ensureStartPage(url))
-					return super.shouldInterceptRequest(view, url);
+					return null;
 				if(url.equals("evocachemeta:app-list.json")) {
 					LOG.e("EvothingsWebViewClient", "serving app-list.json...");
 					try {
@@ -190,7 +220,7 @@ public class Evothings extends CordovaActivity
 				// TODO: add a command for removing apps.
 			}
 
-			return super.shouldInterceptRequest(view, url);
+			return null;
 		}
 
 		private void createAppListJson(File file)
@@ -244,7 +274,7 @@ public class Evothings extends CordovaActivity
 			{
 				// Replace the 'evothings' protocol with 'http'.
 				url = "http" + url.substring(9);
-				appView.loadUrlIntoView(url);
+				appView.loadUrlIntoView(url, true);
 				return true;	// we handled it.
 			}
 			// Load a cached app.
@@ -448,7 +478,7 @@ public class Evothings extends CordovaActivity
 			saveAppList(appList, list, appListFile);
 
 			// Load the original client start-page. It should display the updated app list.
-			appView.loadUrlIntoView(Config.getStartUrl());
+			appView.loadUrlIntoView(Config.getStartUrl(), true);
 		}
 
 		void saveAppList(JSONObject appList, JSONObject list, File appListFile) throws Exception {
@@ -506,7 +536,7 @@ public class Evothings extends CordovaActivity
 			saveAppList(appList, list, appListFile);
 
 			// Load the original client start-page. It should display the updated app list.
-			appView.loadUrlIntoView(Config.getStartUrl());
+			appView.loadUrlIntoView(Config.getStartUrl(), true);
 		}
 
 		void rmRecursive(File f) throws IOException {
@@ -525,7 +555,9 @@ public class Evothings extends CordovaActivity
 			File cacheRoot = mEvothings.getDir("evocache", MODE_PRIVATE);
 			File appListFile = new File(cacheRoot, "app-list.json");
 			if(appListFile.exists()) {
-				JSONObject appList = new JSONObject(utf8StreamToString(new FileInputStream(appListFile)));
+				String s = utf8StreamToString(new FileInputStream(appListFile));
+				LOG.i("EvothingsWebViewClient", s);
+				JSONObject appList = new JSONObject(s);
 				nativeList = appList.optJSONObject("apps");
 			}
 			if(nativeList == null)
@@ -602,7 +634,7 @@ public class Evothings extends CordovaActivity
 			}
 			catch (FileNotFoundException e)
 			{
-				return super.shouldInterceptRequest(view, originalURL);
+				return null;
 			}
 			catch (IOException e)
 			{

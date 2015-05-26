@@ -206,7 +206,7 @@ def addPlugins
 	addMobileChromeAppsPlugin(nil, "org.chromium.common") #, "cordova-plugin-chrome-apps-common")
 	addMobileChromeAppsPlugin('https://developer.chrome.com/apps/system_network',
 		"org.chromium.system.network") #, "cordova-plugin-chrome-apps-system-network")
-	addMobileChromeAppsPlugin(nil, "org.chromium.iosSocketsCommon") #, "cordova-plugin-chrome-apps-iosSocketsCommon")
+	addMobileChromeAppsPlugin(nil, "org.chromium.iossocketscommon") #, "cordova-plugin-chrome-apps-iosSocketsCommon")
 	addMobileChromeAppsPlugin('https://developer.chrome.com/apps/socket',
 		"org.chromium.socket") #, "cordova-plugin-chrome-apps-socket")
 	addMobileChromeAppsPlugin('https://developer.chrome.com/apps/sockets_tcp',
@@ -457,9 +457,9 @@ end
 
 def copyStylesheetAndJQuery
 	if(File.exist?("../evothings-examples/resources"))
+		mkdir_p("www/libs/evothings/ui")
 		cp_r(Dir["../evothings-examples/resources/ui"], "www/")
 		cp_r(Dir["../evothings-examples/resources/libs/jquery"], "www/libs/")
-		mkdir_p("www/libs/evothings/ui")
 		cp("../evothings-examples/resources/libs/evothings/evothings.js",
 			"www/libs/evothings/evothings.js")
 		cp_r(Dir["../evothings-examples/resources/libs/evothings/ui"], "www/libs/evothings/")

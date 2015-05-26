@@ -203,18 +203,18 @@ def addPlugins
 	addApachePlugin("org.apache.cordova.vibration")
 
 	# MobileChromeApps plugins.
-	addMobileChromeAppsPlugin(nil, "org.chromium.common", "cordova-plugin-chrome-apps-common")
+	addMobileChromeAppsPlugin(nil, "org.chromium.common") #, "cordova-plugin-chrome-apps-common")
 	addMobileChromeAppsPlugin('https://developer.chrome.com/apps/system_network',
-		"org.chromium.system.network", "cordova-plugin-chrome-apps-system-network")
-	addMobileChromeAppsPlugin(nil, "org.chromium.iosSocketsCommon", "cordova-plugin-chrome-apps-iosSocketsCommon")
+		"org.chromium.system.network") #, "cordova-plugin-chrome-apps-system-network")
+	addMobileChromeAppsPlugin(nil, "org.chromium.iosSocketsCommon") #, "cordova-plugin-chrome-apps-iosSocketsCommon")
 	addMobileChromeAppsPlugin('https://developer.chrome.com/apps/socket',
-		"org.chromium.socket", "cordova-plugin-chrome-apps-socket")
+		"org.chromium.socket") #, "cordova-plugin-chrome-apps-socket")
 	addMobileChromeAppsPlugin('https://developer.chrome.com/apps/sockets_tcp',
-		"org.chromium.sockets.tcp", "cordova-plugin-chrome-apps-sockets-tcp")
+		"org.chromium.sockets.tcp") #, "cordova-plugin-chrome-apps-sockets-tcp")
 	#addMobileChromeAppsPlugin('https://developer.chrome.com/apps/sockets_tcpServer',
 		#"org.chromium.sockets.tcpserver", "chrome.sockets.tcpServer")	# requires cordova 4.0 on Android.
 	addMobileChromeAppsPlugin('https://developer.chrome.com/apps/sockets_udp',
-		"org.chromium.sockets.udp", "cordova-plugin-chrome-apps-sockets-udp")
+		"org.chromium.sockets.udp") #, "cordova-plugin-chrome-apps-sockets-udp")
 
 	# Plugins on the local file system.
 	addPlugin("com.unarin.cordova.beacon", MarkdownDocumenter.new('README.md'), "../cordova-plugin-ibeacon",

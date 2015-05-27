@@ -188,6 +188,9 @@ def addPlugins
 		addPlugin(ep[:name], nil, ep[:location])
 	end
 
+	# Whitelist plugin required for Cordova 5.
+	addPlugin("cordova-plugin-legacy-whitelist", nil)
+
 	# Add standard Cordova plugins.
 	addApachePlugin("org.apache.cordova.battery-status")
 	addApachePlugin("org.apache.cordova.camera")

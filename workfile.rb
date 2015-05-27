@@ -153,6 +153,17 @@ def addPlugins
 				sh "git clone #{remote}#{postfix}"
 				cd oldDir
 			end
+			# ensure plugin id matches the name given.
+			filename = location+'/plugin.xml'
+			begin
+				id = REXML::Document.new(fileRead(filename)).elements['plugin'].attributes['id']
+			rescue => e
+				puts "Parse error in #{filename}:"
+				raise e
+			end
+			if(id != name)
+				raise "Plugin id mismatch: #{id.inspect} != #{name}"
+			end
 		end
 		# Add plugin if not already installed.
 		if(!File.exist?("plugins/#{name}"))
@@ -192,32 +203,32 @@ def addPlugins
 	addPlugin("cordova-plugin-legacy-whitelist", nil)
 
 	# Add standard Cordova plugins.
-	addApachePlugin("org.apache.cordova.battery-status")
-	addApachePlugin("org.apache.cordova.camera")
-	addApachePlugin("org.apache.cordova.console")
-	addApachePlugin("org.apache.cordova.device")
-	addApachePlugin("org.apache.cordova.device-motion")
-	addApachePlugin("org.apache.cordova.device-orientation")
-	addApachePlugin("org.apache.cordova.dialogs")
-	addApachePlugin("org.apache.cordova.geolocation")
-	addApachePlugin("org.apache.cordova.globalization")
-	addApachePlugin("org.apache.cordova.inappbrowser")
-	addApachePlugin("org.apache.cordova.network-information")
-	addApachePlugin("org.apache.cordova.vibration")
+	addApachePlugin("cordova-plugin-battery-status")
+	addApachePlugin("cordova-plugin-camera")
+	addApachePlugin("cordova-plugin-console")
+	addApachePlugin("cordova-plugin-device")
+	addApachePlugin("cordova-plugin-device-motion")
+	addApachePlugin("cordova-plugin-device-orientation")
+	addApachePlugin("cordova-plugin-dialogs")
+	addApachePlugin("cordova-plugin-geolocation")
+	addApachePlugin("cordova-plugin-globalization")
+	addApachePlugin("cordova-plugin-inappbrowser")
+	addApachePlugin("cordova-plugin-network-information")
+	addApachePlugin("cordova-plugin-vibration")
 
 	# MobileChromeApps plugins.
-	addMobileChromeAppsPlugin(nil, "org.chromium.common", "cordova-plugin-chrome-apps-common")
+	addMobileChromeAppsPlugin(nil, "cordova-plugin-chrome-apps-common")
 	addMobileChromeAppsPlugin('https://developer.chrome.com/apps/system_network',
-		"org.chromium.system.network", "cordova-plugin-chrome-apps-system-network")
-	addMobileChromeAppsPlugin(nil, "org.chromium.iosSocketsCommon", "cordova-plugin-chrome-apps-iosSocketsCommon")
+		"cordova-plugin-chrome-apps-system-network")
+	addMobileChromeAppsPlugin(nil, "cordova-plugin-chrome-apps-iossocketscommon")
 	addMobileChromeAppsPlugin('https://developer.chrome.com/apps/socket',
-		"org.chromium.socket", "cordova-plugin-chrome-apps-socket")
+		"cordova-plugin-chrome-apps-socket")
 	addMobileChromeAppsPlugin('https://developer.chrome.com/apps/sockets_tcp',
-		"org.chromium.sockets.tcp", "cordova-plugin-chrome-apps-sockets-tcp")
-	#addMobileChromeAppsPlugin('https://developer.chrome.com/apps/sockets_tcpServer',
-		#"org.chromium.sockets.tcpserver", "chrome.sockets.tcpServer")	# requires cordova 4.0 on Android.
+		"cordova-plugin-chrome-apps-sockets-tcp")
+	addMobileChromeAppsPlugin('https://developer.chrome.com/apps/sockets_tcpServer',
+		"cordova-plugin-chrome-apps-sockets-tcpserver")	# requires cordova 4.0 on Android.
 	addMobileChromeAppsPlugin('https://developer.chrome.com/apps/sockets_udp',
-		"org.chromium.sockets.udp", "cordova-plugin-chrome-apps-sockets-udp")
+		"cordova-plugin-chrome-apps-sockets-udp")
 
 	# Plugins on the local file system.
 	addPlugin("com.unarin.cordova.beacon", MarkdownDocumenter.new('README.md'), "../cordova-plugin-ibeacon",

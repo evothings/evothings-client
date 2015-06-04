@@ -20,7 +20,7 @@
 #
 # Node.js is required.
 # Required node.js modules (npm):
-# cordova@3.6.3-0.2.13
+# cordova@5.0.0
 #
 # Possible build switches are:
 # c - clean target platform before building

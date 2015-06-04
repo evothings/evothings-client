@@ -1,23 +1,25 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.evothings.evothingsclient"
-	version="1.1.3"
-	android-versionCode="10"
+	version="1.3.0"
+	android-versionCode="11"
 	xmlns="http://www.w3.org/ns/widgets"
 	xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Evothings</name>
-    <description>
-        Mobile app for Evothings Studio.
-    </description>
-    <author email="info@evothings.com" href="http://evothings.com">
-        Evothings AB
-    </author>
-    <content src="index.html" />
-    <access origin="*" />
-    <preference name="fullscreen" value="false" />
-    <preference name="webviewbounce" value="false" />
-    <preference name="DisallowOverscroll" value="true" />
-    <preference name="orientation" value="default" />
-    <preference name="BackgroundColor" value="0xffffffff"/>
+	<name>Evothings</name>
+	<description>
+			Mobile app for Evothings Studio.
+	</description>
+	<author email="info@evothings.com" href="http://evothings.com">
+			Evothings AB
+	</author>
+	<content src="index.html" />
+	<access origin="*" />
+	<allow-intent href="*" />
+	<allow-navigation href="*" />
+	<preference name="fullscreen" value="false" />
+	<preference name="webviewbounce" value="false" />
+	<preference name="DisallowOverscroll" value="true" />
+	<preference name="orientation" value="default" />
+	<preference name="BackgroundColor" value="0xffffffff"/>
 	<preference name="HideKeyboardFormAccessoryBar" value="true" />
 	<preference name="FadeSplashScreen" value="false" />
 	<preference name="EnableViewportScale" value="true" />

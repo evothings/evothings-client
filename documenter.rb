@@ -19,7 +19,7 @@ def writeDocumentationIndex
 			file.puts url
 		end
 	end
-	sh('wget --no-check-certificate -p -nc -k -i chrome.urls')
+	sh('wget --no-check-certificate -p -k -i chrome.urls')
 	#rm('chrome.urls')
 	ChromeIndex.each do |url|
 		uri = URI(url)
@@ -84,7 +84,11 @@ class JdocDocumenter
 	end
 end
 
-def downloadTo(srcUri, dstPath)
+def downloadTo(srcUri, dstPath, previousLocations = [], remainingLimit = 5)
+	if(File.exist?(dstPath))
+		puts "Skipped '#{dstPath}'"
+		return
+	end
 	puts "Downloading #{srcUri} to '#{dstPath}'..."
 	if(srcUri.scheme == 'https')
 		http = Net::HTTP.new(srcUri.host, srcUri.port)
@@ -93,6 +97,16 @@ def downloadTo(srcUri, dstPath)
 		res = http.get(srcUri.path)
 	else
 		res = Net::HTTP.get_response(srcUri)
+	end
+	if(res.is_a?(Net::HTTPRedirection))
+		loc = res['location']
+		if(previousLocations.include?(loc) || remainingLimit <= 0)
+			puts "Redirect loop detected, aborting!"
+			raise "redirect loop"
+		end
+		puts "Redirect #{res.code} to #{loc}"
+		previousLocations << loc
+		return downloadTo(URI(loc), dstPath, previousLocations, remainingLimit - 1)
 	end
 	if(!res.is_a?(Net::HTTPSuccess))
 		throw "Failed to download file!"

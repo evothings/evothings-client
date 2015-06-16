@@ -175,9 +175,9 @@ def addPlugins
 	end
 
 	def addMobileChromeAppsPlugin(docUrl, name, location = name)
+		d = ChromeDocumenter.new(docUrl) if(docUrl)
 		if(location != name)
 			url = 'https://github.com/MobileChromeApps/' + location
-			d = ChromeDocumenter.new(docUrl) if(docUrl)
 			if(defined?(CONFIG_MOBILE_CHROME_APPS_DIR))
 				# If location and config are specified that is used.
 				addPlugin(name, d, CONFIG_MOBILE_CHROME_APPS_DIR + "/" + location, url)
@@ -192,7 +192,7 @@ def addPlugins
 	end
 
 	def addApachePlugin(name)
-		addPlugin(name, MarkdownDocumenter.new('doc/index.md'))
+		addPlugin(name, MarkdownDocumenter.new('README.md'))
 	end
 
 	@extraPlugins.each do |ep|

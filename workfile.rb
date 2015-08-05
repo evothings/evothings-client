@@ -196,7 +196,7 @@ def addPlugins
 	end
 
 	@extraPlugins.each do |ep|
-		addPlugin(ep[:name], nil, ep[:location])
+		addPlugin(ep[:name], ep[:doc], ep[:location], ep[:remote])
 	end
 
 	# Whitelist plugin required for Cordova 5.

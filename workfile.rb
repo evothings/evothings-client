@@ -214,6 +214,7 @@ def addPlugins
 	addApachePlugin("cordova-plugin-globalization")
 	addApachePlugin("cordova-plugin-inappbrowser")
 	addApachePlugin("cordova-plugin-network-information")
+	addApachePlugin("cordova-plugin-statusbar")
 	addApachePlugin("cordova-plugin-vibration")
 
 	# MobileChromeApps plugins.

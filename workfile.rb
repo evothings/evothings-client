@@ -46,8 +46,23 @@
 #
 # Example of how to specify extra plugins in localConfig.rb:
 # @extraPlugins = [
+#   # A local plugin.
 #   {:name => 'http', :location => '../cordova-http-digest'},
-#   {:name => 'pl.makingwaves.estimotebeacons', :location => '../phonegap-estimotebeacons'},
+#
+#   # A named plugin. Fetched via the Cordova plugin registry.
+#   {:name=>'cordova-plugin-file-transfer'},
+#
+#   # A remote plugin. Fetched from the remote URL.
+#   {:name=>'cordova-plugin-file-transfer', :remote=>"https://github.com/apache/cordova-plugin-file-transfer"},
+#
+#   # A complex plugin.
+#   # Fetched from the local directory if it exists.
+#   # Cloned to the local directory from the remote location otherwise.
+#   # Plugin is documented along with the others.
+#   {
+#     :name => "com.cordova.plugins.sms", :doc => MarkdownDocumenter.new('readme.md'),
+#     :location => "../cordova-sms-plugin", :remote => "https://github.com/cordova-sms/cordova-sms-plugin"
+#   },
 # ]
 #
 # Build constants that can be set in localConfig.rb:
@@ -136,16 +151,33 @@ def createDirectories
 end
 
 def addPlugins
-	def addPlugin(name, documenter, location = name, remote = false, branch = false)
+	def checkPluginId(name, location)
+		# ensure plugin id matches the name given.
+		filename = location+'/plugin.xml'
+		begin
+			id = REXML::Document.new(fileRead(filename)).elements['plugin'].attributes['id']
+		rescue => e
+			puts "Parse error in #{filename}:"
+			raise e
+		end
+		if(id != name)
+			raise "Plugin id mismatch: #{id.inspect} != #{name}"
+		end
+	end
+
+	def addPlugin(name, documenter, location = false, remote = false, branch = false)
 		# If a specific location is given, this is considered to be a
 		# "local" plugin, which will be scanned for git version info.
 		# (location can be a file path or URL).
-		if(location != name)
-			if(!remote)
-				raise "Missing remote for plugin #{name}!"
-			end
+		if(location)
 			@localPlugins << {:name=>name, :location=>location, :remote=>remote}
 			if(!File.exist?(location))
+				if(!remote)
+					puts
+					puts "Plugin '#{name}' doesn't exist! Add remote url or local files."
+					puts
+					raise "Plugin '#{name}' doesn't exist!"
+				end
 				oldDir = pwd
 				mkdir_p File.dirname(location)
 				cd File.dirname(location)
@@ -153,30 +185,36 @@ def addPlugins
 				sh "git clone #{remote}#{postfix}"
 				cd oldDir
 			end
-			# ensure plugin id matches the name given.
-			filename = location+'/plugin.xml'
-			begin
-				id = REXML::Document.new(fileRead(filename)).elements['plugin'].attributes['id']
-			rescue => e
-				puts "Parse error in #{filename}:"
-				raise e
-			end
-			if(id != name)
-				raise "Plugin id mismatch: #{id.inspect} != #{name}"
-			end
+			checkPluginId(name, location)
 		end
 		# Add plugin if not already installed.
 		if(!File.exist?("plugins/#{name}"))
-			sh "cordova -d plugin add #{location}"
+
+			# Use local directory, remote URL or plugin registry, in that order.
+			loc = location || remote || name
+
+			sh "cordova -d plugin add #{loc}"
+
+			# If we didn't already check the id, do so now.
+			if(!location)
+				if(!File.exist?("plugins/#{name}"))
+					puts
+					puts "Plugin at '#{loc}' does not have id '#{name}'. Fix your definition!"
+					puts
+					raise "Plugin ID mismatch!"
+				else
+					checkPluginId(name, "plugins/#{name}")
+				end
+			end
 		end
 		if(@documentation && documenter)
 			@documentIndex[name] = documenter.run(name, "plugins/#{name}")
 		end
 	end
 
-	def addMobileChromeAppsPlugin(docUrl, name, location = name)
+	def addMobileChromeAppsPlugin(docUrl, name, location = false)
 		d = ChromeDocumenter.new(docUrl) if(docUrl)
-		if(location != name)
+		if(location)
 			url = 'https://github.com/MobileChromeApps/' + location
 			if(defined?(CONFIG_MOBILE_CHROME_APPS_DIR))
 				# If location and config are specified that is used.

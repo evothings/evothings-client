@@ -196,7 +196,11 @@ def addPlugins
 			sh "cordova -d plugin add #{loc}"
 
 			# If we didn't already check the id, do so now.
-			if(!location)
+			# Check IDs only for remote plugins.
+			# Normally it wouldn't hurt to check named plugins as well, but some plugins,
+			# like Apache's own cordova-plugin-vibration, has malformed plugin.xml files,
+			# which cause our parser to throw an exception.
+			if(!location && remote)
 				if(!File.exist?("plugins/#{name}"))
 					puts
 					puts "Plugin at '#{loc}' does not have id '#{name}'. Fix your definition!"

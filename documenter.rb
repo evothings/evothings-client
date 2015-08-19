@@ -133,11 +133,18 @@ class RenderMarkdownWithDownloadedImages < Redcarpet::Render::HTML
 	def self.setDstDir(dstDir)
 		@@dstDir = dstDir
 	end
+	def self.setSrcDir(srcDir)
+		@@srcDir = srcDir
+	end
   def image(link, title, alt_text)
     uri = URI(link)
 		filename = File.basename(uri.path)
 		dst = "#{@@dstDir}/#{filename}"
-		downloadTo(uri, dst)
+		if(uri.scheme && uri.host)
+			downloadTo(uri, dst)
+		else
+			FileUtils::Verbose.cp("#{@@srcDir}/#{link}", dst)
+		end
 
 		# html spec demands that 'alt' be present.
 		alt_text = filename if(!alt_text || alt_text.length == 0)
@@ -159,6 +166,7 @@ class MarkdownDocumenter
 		mkdir_p(dstDir)
 		dst = "#{dstDir}/index.html"
 		RenderMarkdownWithDownloadedImages.setDstDir(dstDir)
+		RenderMarkdownWithDownloadedImages.setSrcDir(location)
 		markdown = Redcarpet::Markdown.new(RenderMarkdownWithDownloadedImages,
 			no_intra_emphasis: true,
 			tables: true,

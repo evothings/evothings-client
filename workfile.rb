@@ -295,7 +295,7 @@ def addPlugins
 	end
 
 	# Bluetooth Low Energy
-	addPlugin("com.evothings.ble", JdocDocumenter.new('ble.js'), "../cordova-ble",
+	addPlugin("cordova-plugin-ble", JdocDocumenter.new('ble.js'), "../cordova-ble",
 		"https://github.com/evothings/cordova-ble")
 
 	# Standard plugins that are not included.

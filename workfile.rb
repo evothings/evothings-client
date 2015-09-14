@@ -277,7 +277,7 @@ def addPlugins
 	addPlugin("com.unarin.cordova.beacon", MarkdownDocumenter.new('README.md'), "../cordova-plugin-ibeacon",
 		"https://github.com/evothings/cordova-plugin-ibeacon", "evothings-1.0.0")
 
-	addPlugin("pl.makingwaves.estimotebeacons", MarkdownDocumenter.new('documentation.md'), "../phonegap-estimotebeacons/",
+	addPlugin("cordova-plugin-estimote", MarkdownDocumenter.new('documentation.md'), "../phonegap-estimotebeacons/",
 		"https://github.com/evothings/phonegap-estimotebeacons")
 
 	addPlugin("de.appplant.cordova.plugin.local-notification", MarkdownDocumenter.new('README.md'), "../cordova-plugin-local-notifications",

@@ -1,4 +1,10 @@
-##Evothings Client
+# This repository is no longer maintained
+
+Client app for Evothings Studio 1.2. 
+
+Use Evothings Viewer in place of Evothings Client for Evothings Studio 2.x and later.
+
+## Evothings Client
 
 This is the companion app to [Evothings Studio](https://github.com/evothings/EvoThingsStudio).
 
